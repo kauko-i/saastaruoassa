@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head><link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+<title>Säästä ruoassa</title></head>
+<body>
+<h1>Laske, kuinka täytät ravitsemussuositukset halvimmalla!</h1>
+<p>Laskuri perustuu <a href="/aineet">50</a> ruoka-aineen <a href="http://www.fineli.fi/">ravintoarvoihin</a>, niiden keskimääräisiin <a href="https://www.s-kaupat.fi/">hintoihin</a> Prismoissa, valtion ravitsemusneuvottelukunnan <a href="https://www.ruokavirasto.fi/globalassets/teemat/terveytta-edistava-ruokavalio/kuluttaja-ja-ammattilaismateriaali/julkaisut/ravitsemussuositukset_2014_fi_web_versio_5.pdf">suosituksiin</a> vitamiinien, kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista ja <a href="https://en.wikipedia.org/wiki/Linear_programming">lineaariseen optimointiin</a>.</p>
+<p>Syötä tietosi: </p>
+<form action="/" method="POST">
+    <label>
+        Ikä:
+        <select name="ika">
+            {% for ika in iat %}
+                <option value="{{ika.split('-')[0].replace('>', '')}}">{{ika}}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        Sukupuoli: 
+        <select name="puoli">
+            {% for puoli in puolet %}
+                <option value="{{puoli[0]}}">{{puoli}}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>
+        Energiantarve (kcal/päivä):
+        <input required="required" name="energia" type="number"/>
+    </label>
+    </br>
+    <label>
+        <input type="checkbox" name="keliakia"/>
+        Keliakia
+    </label>
+    <label>
+        <input type="checkbox" name="laktoosi"/>
+        Laktoosi-intoleranssi
+    </label>
+    </br>
+    <input type="submit" name="laheta" value="Laske!" onclick="document.getElementById('reading').style.display = 'block';"/>
+</form>
+<p id="reading" style="display: none">Luetaan hintoja...</p>
+{% if tulos and tulos != 'Ei ratkaisua' %}
+<p>Tulokset (viikottainen määrä):</p>
+<ul>
+{% for ruoka in tulos %}
+<li>{{ ruoka['nimi']+" "+ruoka['maara']+" g " }}<a href="{{ruoka['osoite']}}">({{ ruoka['hinta'] }} €)</a></li>
+{% endfor %}
+</ul>
+<p>Yhteensä {{ summa }} €/viikko!</p>
+{% elif tulos == 'Ei ratkaisua' %}
+<p>Syötteen täyttävää ruokakokonaisuutta ei löydy...</p>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head><link rel="stylesheet" href="styles.css" />
+<title>Ruoka-aineet</title></head>
+<body>
+    <p>Laskenta perustuu seuraaviin ruoka-aineisiin: </p>
+    <ul>
+        {% for ruoka in data %}
+            <li>{{ ruoka['nimi'] }} <a href="{{ruoka['osoite']}}">(tuote)</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -20,6 +20,7 @@ JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
 DATABASE_URL = os.environ['DATABASE_URL']
+ENERGIA_YLARAJA = 1.001
 
 def t(A):
 	palaute = []
@@ -55,7 +56,7 @@ def hinnat(osoitteet):
                 hinta = hinta.group(0)[:-len(HINTAPAATTEET[i])]
                 break
         fp.close()
-        palaute.append(float(hinta.replace(",", "."))/10)
+        palaute.append(None if hinta is None else float(hinta.replace(",", "."))/10)
     return palaute
 
 def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
@@ -63,9 +64,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     energia = int(energia)*JOULEA_KALORISSA
 
     # Muodosta b-vektorit ja A-matriisit
-    beq = [energia]
-    Aeq = [[]]
-    bub = []
+    bub = [ENERGIA_YLARAJA*energia,-energia]
     Aub = []
     nimet = []
     osoitteet = []
@@ -92,8 +91,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
 
             curs.execute('SELECT * FROM arvot;')
             for rivi in curs:
-                Aeq[0].append(float(rivi[1]))
-                Aub.append(list(map(lambda x: -float(x), rivi[2:][:-4])))
+                Aub.append([float(rivi[1])]+list(map(lambda x: -float(x), rivi[1:][:-4])))
                 nimet.append(str(rivi[-3]))
                 osoitteet.append(str(rivi[-4]))
                 gluteiinia.append(rivi[-2])
@@ -103,14 +101,13 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     for i in reversed(range(len(c))):
         if c[i] is None or (gluteiinia[i] and keliakia is not None) or (laktoosia[i] and laktoosi is not None):
             del c[i]
-            del Aeq[0][i]
             del Aub[i]
             del nimet[i]
             del osoitteet[i]
 
     Aub = t(Aub)
     try:
-        res = linprog(c, A_ub=Aub, b_ub=bub, A_eq=Aeq, b_eq=beq, method="revised simplex")
+        res = linprog(c, A_ub=Aub, b_ub=bub, method="revised simplex")
     except ValueError:
         return 0
     if not res.success:

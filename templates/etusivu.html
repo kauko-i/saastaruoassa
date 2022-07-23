@@ -3,41 +3,25 @@
 <head><link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 <title>Säästä ruoassa</title></head>
 <body>
+    <script>
+        function checkAndSetLabel() {
+            if (document.getElementById('energia').value)
+                document.getElementById('reading').style.display = 'block';
+        }
+    </script>
 <h1>Laske, kuinka täytät ravitsemussuositukset halvimmalla!</h1>
 <p>Laskuri perustuu <a href="/aineet">50</a> ruoka-aineen <a href="http://www.fineli.fi/">ravintoarvoihin</a>, niiden keskimääräisiin <a href="https://www.s-kaupat.fi/">hintoihin</a> Prismoissa, valtion ravitsemusneuvottelukunnan <a href="https://www.ruokavirasto.fi/globalassets/teemat/terveytta-edistava-ruokavalio/kuluttaja-ja-ammattilaismateriaali/julkaisut/ravitsemussuositukset_2014_fi_web_versio_5.pdf">suosituksiin</a> vitamiinien, kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista ja <a href="https://en.wikipedia.org/wiki/Linear_programming">lineaariseen optimointiin</a>.</p>
 <p>Syötä tietosi: </p>
 <form action="/" method="POST">
-    <label>
-        Ikä:
-        <select name="ika">
-            {% for ika in iat %}
-                <option value="{{ika.split('-')[0].replace('>', '')}}">{{ika}}</option>
-            {% endfor %}
-        </select>
-    </label>
-    <label>
-        Sukupuoli: 
-        <select name="puoli">
-            {% for puoli in puolet %}
-                <option value="{{puoli[0]}}">{{puoli}}</option>
-            {% endfor %}
-        </select>
-    </label>
-    <label>
-        Energiantarve (kcal/päivä):
-        <input required="required" name="energia" type="number"/>
-    </label>
+    {{ form.csrf_token }}
+    {{ form.ika.label }} {{ form.ika }}
+    {{ form.puoli.label }} {{ form.puoli }}
+    {{ form.energia.label }} {{ form.energia }}
     </br>
-    <label>
-        <input type="checkbox" name="keliakia"/>
-        Keliakia
-    </label>
-    <label>
-        <input type="checkbox" name="laktoosi"/>
-        Laktoosi-intoleranssi
-    </label>
+    {{ form.keliakia }} {{ form.keliakia.label }}
+    {{ form.laktoosi }} {{ form.laktoosi.label }}
     </br>
-    <input type="submit" name="laheta" value="Laske!" onclick="document.getElementById('reading').style.display = 'block';"/>
+    <input type="submit" onclick="checkAndSetLabel()" value="Laske!">
 </form>
 <p id="reading" style="display: none">Luetaan hintoja...</p>
 {% if tulos and tulos != 'Ei ratkaisua' %}

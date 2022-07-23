@@ -6,6 +6,10 @@ from scipy.optimize import linprog
 import os
 import psycopg2
 import urllib.request
+from flask_wtf import FlaskForm
+from wtforms import BooleanField, SelectField, IntegerField
+from wtforms.validators import DataRequired
+from flask_wtf.csrf import CSRFProtect
 
 config = {
     "DEBUG": False,
@@ -14,6 +18,8 @@ config = {
 
 app = Flask(__name__)
 app.config.from_mapping(config)
+app.secret_key = os.environ['SECRET_KEY']
+CSRFProtect(app)
 cache = Cache(app)
 
 JOULEA_KALORISSA = 4.18
@@ -63,12 +69,15 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     # Lomake käyttää kilokaloreita, tietokannat jouleja
     energia = int(energia)*JOULEA_KALORISSA
 
+    # Tietokanta yksilöi ikäryhmät alarajan perusteella
+    ika = ''.join(filter(str.isdigit, ika.split('-')[0]))
+
     # Muodosta b-vektorit ja A-matriisit
     bub = [ENERGIA_YLARAJA*energia,-energia]
     Aub = []
     nimet = []
     osoitteet = []
-    ryhma = sukupuoli + ika
+    ryhma = sukupuoli[0] + ika
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     gluteiinia = []
     laktoosia = []
@@ -106,10 +115,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
             del osoitteet[i]
 
     Aub = t(Aub)
-    try:
-        res = linprog(c, A_ub=Aub, b_ub=bub, method="revised simplex")
-    except ValueError:
-        return 0
+    res = linprog(c, A_ub=Aub, b_ub=bub, method="revised simplex")
     if not res.success:
         return 0
     return (nimet, res.x, res.fun, res.x * c, osoitteet)
@@ -136,9 +142,16 @@ def index():
             for r in curs:
                 IKARYHMAT.append(str(r[0]))
     conn.close()
+    class HenkiloForm(FlaskForm):
+        ika = SelectField('Ikä: ', choices=ryhmat2iat(IKARYHMAT))
+        puoli = SelectField('Sukupuoli: ', choices=['Mies','Nainen'])
+        energia = IntegerField('Energiantarve (kcal/päivä): ', validators=[DataRequired()])
+        keliakia = BooleanField('Keliakia')
+        laktoosi = BooleanField('Laktoosi-intoleranssi')
+    form = HenkiloForm()
     tulos = []
     summa = 0
-    if request.method == 'POST':
+    if form.validate_on_submit():
         try:
             (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'), request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'))
             for i in range(len(nimet)):
@@ -147,7 +160,7 @@ def index():
                     tulos.append({'nimi': nimet[i], 'maara': str(grammoja), 'hinta': round(7*hinnat[i],2), 'osoite': ALKU+osoitteet[i]})
         except TypeError:
             tulos = 'Ei ratkaisua'
-    return Response(render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), iat=ryhmat2iat(IKARYHMAT), puolet=["Mies","Nainen"]))
+    return Response(render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), iat=ryhmat2iat(IKARYHMAT), puolet=["Mies","Nainen"], form=form))
 
 if __name__ == '__main__':
     app.debug = True

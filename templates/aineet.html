@@ -9,5 +9,8 @@
             <li>{{ ruoka['nimi'] }} <a href="{{ruoka['osoite']}}">(tuote)</a></li>
         {% endfor %}
     </ul>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    </form>
 </body>
 </html>

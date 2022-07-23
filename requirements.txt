@@ -10,3 +10,5 @@ numpy==1.19.5
 psycopg2-binary==2.9.3
 scipy==1.5.4
 Werkzeug==1.0.1
+WTForms==3.0.1
+Flask-WTF==1.0.1

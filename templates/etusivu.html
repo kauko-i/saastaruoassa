@@ -4,6 +4,17 @@
 <title>Säästä ruoassa</title></head>
 <body>
     <script>
+        function switchNayta() {
+            const additional = document.getElementById('additional');
+            const button = document.getElementById('more');
+            if (additional.style.display == 'none') {
+                additional.style.display = 'block';
+                button.innerHTML = 'Vähemmän laskentaehtoja';
+            } else {
+                additional.style.display = 'none';
+                button.innerHTML = 'Enemmän laskentaehtoja';
+            }
+        }
         function checkAndSetLabel() {
             if (document.getElementById('energia').value)
                 document.getElementById('reading').style.display = 'block';
@@ -23,9 +34,15 @@
     {{ form.kasvis }} {{ form.kasvis.label }}
     {{ form.vege }} {{ form.vege.label }}
     </br>
+    <button type="button" id="more" onclick="switchNayta()">Lisää laskentaehtoja</button>
+    </br>
+    <div style="display: none;" id="additional">
+        {{ form.proteiini.label }} {{ form.proteiini }}
+    </br>
+    </div>
     <input type="submit" onclick="checkAndSetLabel()" value="Laske!">
 </form>
-<p id="reading" style="display: none">Luetaan hintoja...</p>
+<p id="reading">Luetaan hintoja...</p>
 {% if tulos and tulos != 'Ei ratkaisua' %}
 <p>Tulokset (viikottainen määrä):</p>
 <ul>

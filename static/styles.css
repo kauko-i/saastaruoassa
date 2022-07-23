@@ -11,3 +11,12 @@ form select {
     padding: 5px;
     margin: 5px;
 }
+
+#reading {
+    display: none;
+}
+
+button {
+    padding: 5px;
+    margin: 5px;
+}

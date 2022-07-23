@@ -8,7 +8,7 @@ import psycopg2
 import urllib.request
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, SelectField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange, Optional
 from flask_wtf.csrf import CSRFProtect
 
 config = {
@@ -27,6 +27,7 @@ RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
 DATABASE_URL = os.environ['DATABASE_URL']
 ENERGIA_YLARAJA = 1.001
+MILLIGRAMMAA_PER_GRAMMA = 1000
 I_INDEKSI = 27
 B12_INDEKSI = 17
 DHA_INDEKSI = 9
@@ -46,7 +47,6 @@ def ryhmat2iat(ryhmat):
     tuplatpois = sorted(list(map(lambda x: x[1:], filter(lambda x: 'N' not in x, ryhmat))),key=int)
     palaute = map(lambda i: '{}-{}'.format(tuplatpois[i], int(tuplatpois[i + 1]) - 1) if i < len(tuplatpois) - 1 else '>{}'.format(tuplatpois[i]), range(len(tuplatpois)))
     return sorted(palaute, key=lambda x: int(x.split('-')[0].replace('>', '')))
-
 
 ALKU = "https://www.s-kaupat.fi/tuote/"
 HINTAPAATTEET = ["€/kg", "€/l"]
@@ -68,7 +68,7 @@ def hinnat(osoitteet):
         palaute.append(None if hinta is None else float(hinta.replace(",", "."))/10)
     return palaute
 
-def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege):
+def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini):
     # Lomake käyttää kilokaloreita, tietokannat jouleja
     energia = int(energia)*JOULEA_KALORISSA
 
@@ -94,9 +94,12 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege):
                 for i in range(len(rivi)):
                     b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
             # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä.
-            curs.execute('SELECT proteiini FROM saannit WHERE ryhma = %s;', (ryhma,))
-            for rivi in curs:
-                b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
+            if not proteiini:
+                curs.execute('SELECT proteiini FROM saannit WHERE ryhma = %s;', (ryhma,))
+                for rivi in curs:
+                    b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
+            else:
+                b.append(-int(proteiini)*MILLIGRAMMAA_PER_GRAMMA)
             # Hae milligrammoina annetut suositukset
             curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = %s', (ryhma,))
             for rivi in curs:
@@ -166,17 +169,20 @@ def index():
     class HenkiloForm(FlaskForm):
         ika = SelectField('Ikä: ', choices=ryhmat2iat(IKARYHMAT))
         puoli = SelectField('Sukupuoli: ', choices=['Mies','Nainen'])
-        energia = IntegerField('Energiantarve (kcal/päivä): ', validators=[DataRequired()])
+        energia = IntegerField('Energiantarve (kcal/päivä): ', validators=[DataRequired(), NumberRange(min=1)])
         keliakia = BooleanField('Keliakia')
         laktoosi = BooleanField('Laktoosi-intoleranssi')
         kasvis = BooleanField('Kasvissyönti')
         vege = BooleanField('Veganismi (Jos ruksaat, laskuri sivuuttaa DHA-rasvahapon, B12-vitamiinin ja jodin)')
+        proteiini = IntegerField('Proteiinia (g/päivä)', validators=[Optional(), NumberRange(min=0)])
     form = HenkiloForm()
     tulos = []
     summa = 0
     if form.validate_on_submit():
         try:
-            (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'), request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'), request.form.get('kasvis'), request.form.get('vege'))
+            (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'),
+                request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'), request.form.get('kasvis'),
+                request.form.get('vege'), request.form.get('proteiini'))
             for i in range(len(nimet)):
                 grammoja = int(float(maarat[i])*100*7 + 0.5)
                 if grammoja != 0:

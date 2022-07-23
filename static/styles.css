@@ -1,3 +1,13 @@
 form {
     background: #CCCCCC;
 }
+
+form input {
+    padding: 5px;
+    margin: 5px;
+}
+
+form select {
+    padding: 5px;
+    margin: 5px;
+}

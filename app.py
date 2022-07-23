@@ -27,6 +27,9 @@ RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
 DATABASE_URL = os.environ['DATABASE_URL']
 ENERGIA_YLARAJA = 1.001
+I_INDEKSI = 27
+B12_INDEKSI = 17
+DHA_INDEKSI = 9
 
 def t(A):
 	palaute = []
@@ -65,7 +68,7 @@ def hinnat(osoitteet):
         palaute.append(None if hinta is None else float(hinta.replace(",", "."))/10)
     return palaute
 
-def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
+def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege):
     # Lomake käyttää kilokaloreita, tietokannat jouleja
     energia = int(energia)*JOULEA_KALORISSA
 
@@ -79,8 +82,10 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     osoitteet = []
     ryhma = sukupuoli[0] + ika
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    gluteiinia = []
+    gluteenia = []
     laktoosia = []
+    lihaa = []
+    elainperainen = []
     with conn:
         with conn.cursor() as curs:
             # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
@@ -98,23 +103,36 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
                 for i in range(len(rivi)):
                     b.append(-float(rivi[i]))
 
-            curs.execute('SELECT * FROM arvot;')
+            curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
+                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot;''')
             for rivi in curs:
-                A.append([float(rivi[1])]+list(map(lambda x: -float(x), rivi[1:][:-4])))
-                nimet.append(str(rivi[-3]))
-                osoitteet.append(str(rivi[-4]))
-                gluteiinia.append(rivi[-2])
-                laktoosia.append(rivi[-1])
+                A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
+            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege FROM arvot;')
+            for rivi in curs:
+                osoitteet.append(rivi[0])
+                nimet.append(rivi[1])
+                gluteenia.append(rivi[2])
+                laktoosia.append(rivi[3])
+                lihaa.append(rivi[4])
+                elainperainen.append(rivi[5])
     conn.close()
     c = hinnat(osoitteet)
     for i in reversed(range(len(c))):
-        if c[i] is None or (gluteiinia[i] and keliakia is not None) or (laktoosia[i] and laktoosi is not None):
+        if c[i] is None or (gluteenia[i] and keliakia) or (laktoosia[i] and laktoosi) or (lihaa[i] and kasvis) or (elainperainen[i] and vege):
             del c[i]
             del A[i]
             del nimet[i]
             del osoitteet[i]
 
     A = t(A)
+
+    if vege:
+        del b[I_INDEKSI]
+        del b[B12_INDEKSI]
+        del b[DHA_INDEKSI]
+        del A[I_INDEKSI]
+        del A[B12_INDEKSI]
+        del A[DHA_INDEKSI]
     try:
         res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
     except ValueError:
@@ -151,12 +169,14 @@ def index():
         energia = IntegerField('Energiantarve (kcal/päivä): ', validators=[DataRequired()])
         keliakia = BooleanField('Keliakia')
         laktoosi = BooleanField('Laktoosi-intoleranssi')
+        kasvis = BooleanField('Kasvissyönti')
+        vege = BooleanField('Veganismi (Jos ruksaat, laskuri sivuuttaa DHA-rasvahapon, B12-vitamiinin ja jodin)')
     form = HenkiloForm()
     tulos = []
     summa = 0
     if form.validate_on_submit():
         try:
-            (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'), request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'))
+            (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'), request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'), request.form.get('kasvis'), request.form.get('vege'))
             for i in range(len(nimet)):
                 grammoja = int(float(maarat[i])*100*7 + 0.5)
                 if grammoja != 0:

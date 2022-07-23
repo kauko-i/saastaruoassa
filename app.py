@@ -73,8 +73,8 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     ika = ''.join(filter(str.isdigit, ika.split('-')[0]))
 
     # Muodosta b-vektorit ja A-matriisit
-    bub = [ENERGIA_YLARAJA*energia,-energia]
-    Aub = []
+    b = [ENERGIA_YLARAJA*energia,-energia]
+    A = []
     nimet = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
@@ -87,20 +87,20 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
             curs.execute('SELECT rasvat,kertarasvat,monirasvat,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = %s;', (ryhma,))
             for rivi in curs:
                 for i in range(len(rivi)):
-                    bub.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
+                    b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
             # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä.
             curs.execute('SELECT proteiini FROM saannit WHERE ryhma = %s;', (ryhma,))
             for rivi in curs:
-                bub.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
+                b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
             # Hae milligrammoina annetut suositukset
             curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = %s', (ryhma,))
             for rivi in curs:
                 for i in range(len(rivi)):
-                    bub.append(-float(rivi[i]))
+                    b.append(-float(rivi[i]))
 
             curs.execute('SELECT * FROM arvot;')
             for rivi in curs:
-                Aub.append([float(rivi[1])]+list(map(lambda x: -float(x), rivi[1:][:-4])))
+                A.append([float(rivi[1])]+list(map(lambda x: -float(x), rivi[1:][:-4])))
                 nimet.append(str(rivi[-3]))
                 osoitteet.append(str(rivi[-4]))
                 gluteiinia.append(rivi[-2])
@@ -110,12 +110,15 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi):
     for i in reversed(range(len(c))):
         if c[i] is None or (gluteiinia[i] and keliakia is not None) or (laktoosia[i] and laktoosi is not None):
             del c[i]
-            del Aub[i]
+            del A[i]
             del nimet[i]
             del osoitteet[i]
 
-    Aub = t(Aub)
-    res = linprog(c, A_ub=Aub, b_ub=bub, method="revised simplex")
+    A = t(A)
+    try:
+        res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
+    except ValueError:
+        return 0
     if not res.success:
         return 0
     return (nimet, res.x, res.fun, res.x * c, osoitteet)

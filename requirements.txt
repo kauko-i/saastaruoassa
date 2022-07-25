@@ -12,3 +12,4 @@ scipy==1.5.4
 Werkzeug==1.0.1
 WTForms==3.0.1
 Flask-WTF==1.0.1
+aiohttp==3.8.0

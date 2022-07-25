@@ -1,6 +1,5 @@
 from flask import Flask, Response, render_template, request
 from flask_caching import Cache
-import urllib.request
 import re
 from scipy.optimize import linprog
 import os
@@ -10,18 +9,23 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from flask_wtf.csrf import CSRFProtect
+import asyncio
+import aiohttp
 
+# Välimuistin asetukset
 config = {
     "DEBUG": False,
     "CACHE_TYPE": "SimpleCache",
 }
 
+# Alusta sovellus.
 app = Flask(__name__)
 app.config.from_mapping(config)
 app.secret_key = os.environ['SECRET_KEY']
 CSRFProtect(app)
 cache = Cache(app)
 
+# Ohjelmaa koskevat vakiot
 JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
@@ -31,7 +35,9 @@ MILLIGRAMMAA_PER_GRAMMA = 1000
 I_INDEKSI = 27
 B12_INDEKSI = 17
 DHA_INDEKSI = 9
+SUKUPUOLET = ['Mies, Nainen']
 
+# Transpoosifunktio: tietokannassa ruoka-aineet vastaavat rivejä, mutta laskennassa niiden on vastattava sarakkeita.
 def t(A):
 	palaute = []
 	for i in range(len(A[0])):
@@ -43,41 +49,62 @@ def t(A):
 			palaute[j][i] = A[i][j]
 	return palaute
 
+'''
+Muuntaa tietokannan käyttämät ryhmätunnukset (sukupuoli+alkuvuosi) käyttäjältä kysyttävään ikäryhmämuotoon 
+(alkuvuosi-loppuvuosi tai >alkuvuosi korkeimmalle).
+'''
 def ryhmat2iat(ryhmat):
     tuplatpois = sorted(list(map(lambda x: x[1:], filter(lambda x: 'N' not in x, ryhmat))),key=int)
     palaute = map(lambda i: '{}-{}'.format(tuplatpois[i], int(tuplatpois[i + 1]) - 1) if i < len(tuplatpois) - 1 else '>{}'.format(tuplatpois[i]), range(len(tuplatpois)))
     return sorted(palaute, key=lambda x: int(x.split('-')[0].replace('>', '')))
 
+# Hinnanlukua koskevat vakiot
 ALKU = "https://www.s-kaupat.fi/tuote/"
-HINTAPAATTEET = ["€/kg", "€/l"]
+HINTAPAATTEET = [" €/kg", " €/l"]
 
+'''
+Hakee ruoka-aineiden ilmoitetut keskihinnat Prismoissa ja tallentaa ne välimuistiin.
+Listaan tulee None, jos tietokannan osoitteella ei löydy vastaavaa tuotetta.
+Palautetaan lista, jossa indeksi i vastaa osoitteesta i löytyvää hintaa.
+'''
 @cache.cached(timeout=86400)
 def hinnat(osoitteet):
-    palaute = []
-    for rivi in osoitteet:
-        osoite = ALKU + rivi
-        fp = urllib.request.urlopen(osoite)
-        html = fp.read().decode("utf8")
-        hinta = None
-        for i in range(len(HINTAPAATTEET)):
-            hinta = re.search("\d*,\d* {}".format(HINTAPAATTEET[i]), html)
-            if hinta:
-                hinta = hinta.group(0)[:-len(HINTAPAATTEET[i])]
-                break
-        fp.close()
-        palaute.append(None if hinta is None else float(hinta.replace(",", "."))/10)
-    return palaute
+    async def hinnatNoCache(osoitteet):
+        hintadict = {}
+        async def hinta(osoite):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(ALKU+osoite) as response:
+                    html = await response.text()
+                    hinta = None
+                    for i in range(len(HINTAPAATTEET)):
+                        hinta = re.search("\d*,\d*{}".format(HINTAPAATTEET[i]), html)
+                        if hinta:
+                            hinta = hinta.group(0)[:-len(HINTAPAATTEET[i])]
+                            break
+                    hintadict[osoite] = None if hinta is None else float(hinta.replace(',', '.'))/10
+        tasks = []
+        for osoite in osoitteet:
+             tasks.append(asyncio.create_task(hinta(osoite)))
+        for task in tasks:
+            await task
+        return list(map(lambda x: hintadict[x], osoitteet))
+    return asyncio.run(hinnatNoCache(osoitteet))
 
+'''
+Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi suositusruokalistaksi.
+Parametrit ovat samat kuin lomakkeella.
+'''
 def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini):
-    # Lomake käyttää kilokaloreita, tietokannat jouleja
+    # Lomake käyttää kilokaloreita, tietokannat jouleja.
     energia = int(energia)*JOULEA_KALORISSA
 
-    # Tietokanta yksilöi ikäryhmät alarajan perusteella
+    # Tietokanta yksilöi ikäryhmät alarajan perusteella.
     ika = ''.join(filter(str.isdigit, ika.split('-')[0]))
 
-    # Muodosta b-vektorit ja A-matriisit
+    # Muodosta b-vektori ja A-matriisi. Vaikutti, että energiansaantivaatimuksen ei pidä olla aivan tarkka, jottei laskenta sekoaisi.
     b = [ENERGIA_YLARAJA*energia,-energia]
     A = []
+    # Seuraavissa 6 taulukossa indeksit vastaavat matriisin A rivejä (myöhemmin sarakkeita).
     nimet = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
@@ -93,24 +120,26 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
             for rivi in curs:
                 for i in range(len(rivi)):
                     b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
-            # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä.
+            # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä, tai käytä käyttäjän syötettä.
             if not proteiini:
                 curs.execute('SELECT proteiini FROM saannit WHERE ryhma = %s;', (ryhma,))
                 for rivi in curs:
                     b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
             else:
                 b.append(-int(proteiini)*MILLIGRAMMAA_PER_GRAMMA)
-            # Hae milligrammoina annetut suositukset
+            # Hae milligrammoina annetut suositukset.
             curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = %s', (ryhma,))
             for rivi in curs:
                 for i in range(len(rivi)):
                     b.append(-float(rivi[i]))
 
+            # Hae ravintoarvot.
             curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
-                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot;''')
+                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi;''')
             for rivi in curs:
                 A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
-            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege FROM arvot;')
+            # Hae ruokien tuoteosoitteet, partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
+            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege FROM arvot ORDER BY nimi;')
             for rivi in curs:
                 osoitteet.append(rivi[0])
                 nimet.append(rivi[1])
@@ -120,6 +149,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
                 elainperainen.append(rivi[5])
     conn.close()
     c = hinnat(osoitteet)
+    # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
     for i in reversed(range(len(c))):
         if c[i] is None or (gluteenia[i] and keliakia) or (laktoosia[i] and laktoosi) or (lihaa[i] and kasvis) or (elainperainen[i] and vege):
             del c[i]
@@ -127,8 +157,10 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
             del nimet[i]
             del osoitteet[i]
 
+    # Muuta A transpoosikseen.
     A = t(A)
 
+    # Vegaaniruokavalion laskenta vaatii, että tietyt ravintoaineet jätetään huomiotta.
     if vege:
         del b[I_INDEKSI]
         del b[B12_INDEKSI]
@@ -136,6 +168,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         del A[I_INDEKSI]
         del A[B12_INDEKSI]
         del A[DHA_INDEKSI]
+    # Varsinainen laskenta
     try:
         res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
     except ValueError:
@@ -144,6 +177,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         return 0
     return (nimet, res.x, res.fun, res.x * c, osoitteet)
 
+# Hakee tietokannasta ruoka-aineiden nimet ja tuoteosoitteet käyttäjälle näytettäväksi.
 @app.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
@@ -156,6 +190,7 @@ def aineet():
     conn.close()
     return render_template('aineet.html', data=nimetjaosoitteet)
 
+# Etusivun näyttävä "pääohjelma"
 @app.route('/',methods=['GET','POST'])
 def index():
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -189,7 +224,7 @@ def index():
                     tulos.append({'nimi': nimet[i], 'maara': str(grammoja), 'hinta': round(7*hinnat[i],2), 'osoite': ALKU+osoitteet[i]})
         except TypeError:
             tulos = 'Ei ratkaisua'
-    return Response(render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), iat=ryhmat2iat(IKARYHMAT), puolet=["Mies","Nainen"], form=form))
+    return Response(render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), puolet=SUKUPUOLET, form=form))
 
 if __name__ == '__main__':
     app.debug = True

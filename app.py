@@ -4,7 +4,6 @@ import re
 from scipy.optimize import linprog
 import os
 import psycopg2
-import urllib.request
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, NumberRange, Optional
@@ -91,7 +90,7 @@ def hinnat(osoitteet):
     return asyncio.run(hinnatNoCache(osoitteet))
 
 '''
-Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi suositusruokalistaksi.
+Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi tulokseksi.
 Parametrit ovat samat kuin lomakkeella.
 '''
 def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini):

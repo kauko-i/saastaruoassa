@@ -1,4 +1,4 @@
-from flask import Flask, Response, render_template, request
+from flask import Flask, render_template, request
 from flask_caching import Cache
 import re
 from scipy.optimize import linprog
@@ -223,7 +223,7 @@ def index():
                     tulos.append({'nimi': nimet[i], 'maara': str(grammoja), 'hinta': round(7*hinnat[i],2), 'osoite': ALKU+osoitteet[i]})
         except TypeError:
             tulos = 'Ei ratkaisua'
-    return Response(render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), puolet=SUKUPUOLET, form=form))
+    return render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), puolet=SUKUPUOLET, form=form)
 
 if __name__ == '__main__':
     app.debug = True

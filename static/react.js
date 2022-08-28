@@ -142,6 +142,7 @@ class Tuloslista extends React.PureComponent {
         if (this.props.viesti)
             return <p>{this.props.viesti}</p>;
         return <div>
+            <p>Tulokset (viikottainen määrä):</p>
             <ul>{
             this.props.lista.filter((aine) => aine.maara != 0).map(function (aine) {
                 return <li key={aine.nimi}>{aine.nimi} {Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA)} g <a href={''+aine.osoite}>({Math.round(aine.hinta*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €)</a></li>;

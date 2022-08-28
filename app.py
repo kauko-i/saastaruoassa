@@ -4,25 +4,23 @@ import re
 from scipy.optimize import linprog
 import os
 import psycopg2
-from flask_wtf import FlaskForm
-from wtforms import BooleanField, SelectField, IntegerField
-from wtforms.validators import DataRequired, NumberRange, Optional
 from flask_wtf.csrf import CSRFProtect
 import asyncio
 import aiohttp
+from flask_cors import CORS
 
 # Välimuistin asetukset
 config = {
     "DEBUG": False,
     "CACHE_TYPE": "SimpleCache",
+    "CORS_HEADERS": "application/json",
 }
 
 # Alusta sovellus.
 app = Flask(__name__)
 app.config.from_mapping(config)
-app.secret_key = os.environ['SECRET_KEY']
-CSRFProtect(app)
 cache = Cache(app)
+CORS(app)
 
 # Ohjelmaa koskevat vakiot
 JOULEA_KALORISSA = 4.18
@@ -171,10 +169,12 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
     try:
         res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
     except ValueError:
-        return 0
+        return {}
     if not res.success:
-        return 0
-    return (nimet, res.x, res.fun, res.x * c, osoitteet)
+        return {}
+    hintavektori = res.x * c
+    palaute = [{'nimi': nimet[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
+    return { 'lista':palaute, 'yhteensa':res.fun }
 
 # Hakee tietokannasta ruoka-aineiden nimet ja tuoteosoitteet käyttäjälle näytettäväksi.
 @app.route('/aineet')
@@ -192,38 +192,16 @@ def aineet():
 # Etusivun näyttävä "pääohjelma"
 @app.route('/',methods=['GET','POST'])
 def index():
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    IKARYHMAT = []
-    with conn:
+    if request.method == 'POST':
+        req = request.json
+        res = syote2tulos(req['ika'], req['sukupuoli'], req['energia'], req['keliakia'], req['laktoosi'], req['kasvis'], req['vegaani'], False)
+        return res
+    ikaryhmat = []
+    with psycopg2.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
-            for r in curs:
-                IKARYHMAT.append(str(r[0]))
-    conn.close()
-    class HenkiloForm(FlaskForm):
-        ika = SelectField('Ikä: ', choices=ryhmat2iat(IKARYHMAT))
-        puoli = SelectField('Sukupuoli: ', choices=['Mies','Nainen'])
-        energia = IntegerField('Energiantarve (kcal/päivä): ', validators=[DataRequired(), NumberRange(min=1)])
-        keliakia = BooleanField('Keliakia')
-        laktoosi = BooleanField('Laktoosi-intoleranssi')
-        kasvis = BooleanField('Kasvissyönti')
-        vege = BooleanField('Veganismi (Jos ruksaat, laskuri sivuuttaa DHA-rasvahapon, B12-vitamiinin ja jodin)')
-        proteiini = IntegerField('Proteiinia (g/päivä)', validators=[Optional(), NumberRange(min=0)])
-    form = HenkiloForm()
-    tulos = []
-    summa = 0
-    if form.validate_on_submit():
-        try:
-            (nimet,maarat,summa,hinnat,osoitteet) = syote2tulos(request.form.get('ika'), request.form.get('puoli'),
-                request.form.get('energia'), request.form.get('keliakia'), request.form.get('laktoosi'), request.form.get('kasvis'),
-                request.form.get('vege'), request.form.get('proteiini'))
-            for i in range(len(nimet)):
-                grammoja = int(float(maarat[i])*100*7 + 0.5)
-                if grammoja != 0:
-                    tulos.append({'nimi': nimet[i], 'maara': str(grammoja), 'hinta': round(7*hinnat[i],2), 'osoite': ALKU+osoitteet[i]})
-        except TypeError:
-            tulos = 'Ei ratkaisua'
-    return render_template('etusivu.html', tulos=tulos, summa=round(summa*7,2), puolet=SUKUPUOLET, form=form)
+            ikaryhmat = ','.join(sorted(set([x[0][1:] for x in curs.fetchall()]), key=int))
+    return render_template('etusivu.html', ryhmat=ikaryhmat)
 
 if __name__ == '__main__':
     app.debug = True

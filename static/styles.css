@@ -1,7 +1,3 @@
-form {
-    background: #CCCCCC;
-}
-
 form input {
     padding: 5px;
     margin: 5px;
@@ -12,11 +8,7 @@ form select {
     margin: 5px;
 }
 
-#reading {
-    display: none;
-}
-
-button {
+form button {
     padding: 5px;
     margin: 5px;
 }

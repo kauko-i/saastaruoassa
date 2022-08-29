@@ -81,15 +81,15 @@ class HenkiloLomake extends React.PureComponent {
                 'Content-type': 'application/json',
             },
             body: JSON.stringify({
-                'ika': this.state.ika,
-                'sukupuoli': this.state.sukupuoli,
-                'energia': this.state.energia,
-                'keliakia': this.state.keliakia,
-                'laktoosi': this.state.laktoosi,
-                'kasvis': this.state.kasvis,
-                'vegaani': this.state.vegaani,
-                'proteiini': this.state.proteiini,
-                'd': this.state.d
+                ika: this.state.ika,
+                sukupuoli: this.state.sukupuoli,
+                energia: this.state.energia,
+                keliakia: this.state.keliakia,
+                laktoosi: this.state.laktoosi,
+                kasvis: this.state.kasvis,
+                vegaani: this.state.vegaani,
+                proteiini: this.state.proteiini,
+                d: this.state.d
             }),
         }).then((res) => res.json()).then((res) => {
             if (JSON.stringify(res) === '{}') {
@@ -121,8 +121,8 @@ class HenkiloLomake extends React.PureComponent {
                         <option id="N">Nainen</option>
                     </select>
                 </label>
-                <label onChange={this.handleChange}>Energiantarve (kcal/päivä):
-                    <input required name="energia" type="number"/>
+                <label>Energiantarve (kcal/päivä):
+                    <input onChange={this.handleChange} required name="energia" type="number"/>
                 </label>
             </fieldset>
             <fieldset>
@@ -186,9 +186,10 @@ class Tuloslista extends React.PureComponent {
         return <div>
             <p>Tulokset (viikottainen määrä):</p>
             <ul>{
-            this.props.lista.filter((aine) => aine.maara != 0).map(function (aine) {
-                return <li key={aine.nimi}>{aine.nimi} {Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA)} g <a href={''+aine.osoite}>({Math.round(aine.hinta*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €)</a></li>;
-            })}
+                this.props.lista.filter((aine) => aine.maara != 0).map(function (aine) {
+                    return <li key={aine.nimi}>{aine.nimi} {Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA)} g <a href={''+aine.osoite}>({Math.round(aine.hinta*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €)</a></li>;
+                })
+            }
             </ul>
             <p>Yhteensä {Math.round(this.props.paivassa*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €/viikko!</p>
         </div>;

@@ -6,7 +6,7 @@ class Laskuri extends React.PureComponent {
     constructor(props) {
         super(props);
         this.paivitaState = this.paivitaState.bind(this);
-        this.state = { viesti: '', lista: [], viikossa: '' };
+        this.state = { viesti: '', lista: [], paivassa: '' };
     }
 
     paivitaState(uusi) {
@@ -17,7 +17,7 @@ class Laskuri extends React.PureComponent {
         return (<div>
             <HenkiloLomake paivitaState={this.paivitaState}></HenkiloLomake>
             {(this.state.viesti || this.state.lista.length != 0) &&
-                <Tuloslista viesti={this.state.viesti} lista={this.state.lista} viikossa={this.state.viikossa}></Tuloslista>
+                <Tuloslista viesti={this.state.viesti} lista={this.state.lista} paivassa={this.state.paivassa}></Tuloslista>
             }
         </div>
         );
@@ -72,7 +72,7 @@ class HenkiloLomake extends React.PureComponent {
             if (JSON.stringify(res) === '{}') {
                 this.props.paivitaState({viesti: 'Vaatimukset täyttävää kokonaisuutta ei löydy...', lista: []});
             } else {
-                this.props.paivitaState({viesti: '', lista: res.lista, viikossa: res.yhteensa});
+                this.props.paivitaState({viesti: '', lista: res.lista, paivassa: res.yhteensa});
             }
         });
         this.props.paivitaState({viesti: 'Luetaan hintoja...', lista: []});
@@ -128,7 +128,7 @@ class HenkiloLomake extends React.PureComponent {
                     Vegaani
                 </label>
             </fieldset>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="Laske" />
         </form>);
     }
 }
@@ -148,7 +148,7 @@ class Tuloslista extends React.PureComponent {
                 return <li key={aine.nimi}>{aine.nimi} {Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA)} g <a href={''+aine.osoite}>({Math.round(aine.hinta*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €)</a></li>;
             })}
             </ul>
-            <p>Yhteensä {Math.round(this.props.viikossa*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €/viikko!</p>
+            <p>Yhteensä {Math.round(this.props.paivassa*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €/viikko!</p>
         </div>;
     }
 }

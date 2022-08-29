@@ -29,9 +29,11 @@ PROTEIININ_ENERGIA = 0.017
 DATABASE_URL = os.environ['DATABASE_URL']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
+MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
 I_INDEKSI = 27
 B12_INDEKSI = 17
 DHA_INDEKSI = 9
+D_INDEKSI = 19
 SUKUPUOLET = ['Mies, Nainen']
 
 # Transpoosifunktio: tietokannassa ruoka-aineet vastaavat rivejä, mutta laskennassa niiden on vastattava sarakkeita.
@@ -91,7 +93,7 @@ def hinnat(osoitteet):
 Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi tulokseksi.
 Parametrit ovat samat kuin lomakkeella.
 '''
-def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini):
+def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini, d):
     # Lomake käyttää kilokaloreita, tietokannat jouleja.
     energia = int(energia)*JOULEA_KALORISSA
 
@@ -157,6 +159,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
     # Muuta A transpoosikseen.
     A = t(A)
 
+    # Jos d-vitamiinille on annettu "aurinkosaanti" (osuus, jota ei tarvitse saada ruoasta),
+    # vähennetään se D-vitamiinivaatimuksesta.
+    if d:
+        b[D_INDEKSI] += int(d)/MIKROGRAMMAA_PER_MILLIGRAMMA
+
     # Vegaaniruokavalion laskenta vaatii, että tietyt ravintoaineet jätetään huomiotta.
     if vege:
         del b[I_INDEKSI]
@@ -194,7 +201,17 @@ def aineet():
 def index():
     if request.method == 'POST':
         req = request.json
-        res = syote2tulos(req['ika'], req['sukupuoli'], req['energia'], req['keliakia'], req['laktoosi'], req['kasvis'], req['vegaani'], req['proteiini'])
+        res = syote2tulos(
+            req['ika'],
+            req['sukupuoli'],
+            req['energia'],
+            req['keliakia'],
+            req['laktoosi'],
+            req['kasvis'],
+            req['vegaani'],
+            req['proteiini'],
+            req['d']
+        )
         return res
     ikaryhmat = []
     with psycopg2.connect(DATABASE_URL, sslmode='require') as conn:

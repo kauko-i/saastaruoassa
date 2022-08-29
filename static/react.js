@@ -37,6 +37,7 @@ class HenkiloLomake extends React.PureComponent {
             kasvis: false,
             vegaani: false,
             proteiini: '',
+            d: '',
             buttonText: 'Lisää hakuehtoja'
         };
         this.handleChange = this.handleChange.bind(this);
@@ -47,7 +48,7 @@ class HenkiloLomake extends React.PureComponent {
     switchCollapse() {
         const fields = document.querySelector('#collapsible');
         if (fields.style.maxHeight) {
-            this.setState({ buttonText: 'Lisää hakuehtoja', proteiini: '' });
+            this.setState({ buttonText: 'Lisää hakuehtoja', proteiini: '', d: '' });
             fields.style.maxHeight = null;
         } else {
             this.setState({ buttonText: 'Vähemmän hakuehtoja' });
@@ -63,8 +64,8 @@ class HenkiloLomake extends React.PureComponent {
             else
                 target.setCustomValidity('');
         }
-        if (target.name === 'proteiini') {
-            if (target !== '' && !target.value.match(/^\d+$/))
+        if (target.name === 'proteiini' || target.name === 'd') {
+            if (!target.value.match(/^\d*$/))
                 target.setCustomValidity('Syötä ei-negatiivinen luku!')
             else
                 target.setCustomValidity('');
@@ -87,7 +88,8 @@ class HenkiloLomake extends React.PureComponent {
                 'laktoosi': this.state.laktoosi,
                 'kasvis': this.state.kasvis,
                 'vegaani': this.state.vegaani,
-                'proteiini': this.state.proteiini
+                'proteiini': this.state.proteiini,
+                'd': this.state.d
             }),
         }).then((res) => res.json()).then((res) => {
             if (JSON.stringify(res) === '{}') {
@@ -156,6 +158,13 @@ class HenkiloLomake extends React.PureComponent {
                         Proteiinia vähintään (g/päivä):
                         <input name="proteiini"
                             value={this.state.proteiini}
+                            onChange={this.handleChange}
+                            type="number"/>
+                    </label>
+                    <label>
+                        D-vitamiinin aurinkosaanti (μg/päivä):
+                        <input name="d"
+                            value={this.state.d}
                             onChange={this.handleChange}
                             type="number"/>
                     </label>

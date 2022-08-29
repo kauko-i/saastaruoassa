@@ -194,7 +194,7 @@ def aineet():
 def index():
     if request.method == 'POST':
         req = request.json
-        res = syote2tulos(req['ika'], req['sukupuoli'], req['energia'], req['keliakia'], req['laktoosi'], req['kasvis'], req['vegaani'], False)
+        res = syote2tulos(req['ika'], req['sukupuoli'], req['energia'], req['keliakia'], req['laktoosi'], req['kasvis'], req['vegaani'], req['proteiini'])
         return res
     ikaryhmat = []
     with psycopg2.connect(DATABASE_URL, sslmode='require') as conn:

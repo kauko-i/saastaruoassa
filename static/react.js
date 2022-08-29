@@ -35,17 +35,37 @@ class HenkiloLomake extends React.PureComponent {
             keliakia: false,
             laktoosi: false,
             kasvis: false,
-            vegaani: false
+            vegaani: false,
+            proteiini: '',
+            buttonText: 'Lisää hakuehtoja'
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.switchCollapse = this.switchCollapse.bind(this);
+    }
+
+    switchCollapse() {
+        const fields = document.querySelector('#collapsible');
+        if (fields.style.maxHeight) {
+            this.setState({ buttonText: 'Lisää hakuehtoja', proteiini: '' });
+            fields.style.maxHeight = null;
+        } else {
+            this.setState({ buttonText: 'Vähemmän hakuehtoja' });
+            fields.style.maxHeight = fields.scrollHeight + 'px';
+        }
     }
 
     handleChange(event) {
         const { target } = event;
-        if (target.name == 'energia') {
+        if (target.name === 'energia') {
             if (!target.value.match(/^[1-9]\d*$/))
                 target.setCustomValidity('Syötä positiivinen tarve!');
+            else
+                target.setCustomValidity('');
+        }
+        if (target.name === 'proteiini') {
+            if (target !== '' && !target.value.match(/^\d+$/))
+                target.setCustomValidity('Syötä ei-negatiivinen luku!')
             else
                 target.setCustomValidity('');
         }
@@ -66,7 +86,8 @@ class HenkiloLomake extends React.PureComponent {
                 'keliakia': this.state.keliakia,
                 'laktoosi': this.state.laktoosi,
                 'kasvis': this.state.kasvis,
-                'vegaani': this.state.vegaani
+                'vegaani': this.state.vegaani,
+                'proteiini': this.state.proteiini
             }),
         }).then((res) => res.json()).then((res) => {
             if (JSON.stringify(res) === '{}') {
@@ -85,7 +106,7 @@ class HenkiloLomake extends React.PureComponent {
                     <select name="ika" onChange={this.handleChange}>
                         {
                             this.state.ryhmat.map((ryhma, i) => {
-                                if (i == this.state.ryhmat.length - 1)
+                                if (i === this.state.ryhmat.length - 1)
                                     return <option key={ryhma} id={ryhma}>&gt;{ryhma}</option>;
                                 return <option key={ryhma} id={ryhma}>{ryhma}-{Number(this.state.ryhmat[i + 1]) - 1}</option>;
                             })
@@ -128,6 +149,18 @@ class HenkiloLomake extends React.PureComponent {
                     Vegaani
                 </label>
             </fieldset>
+            <button type="button" onClick={this.switchCollapse}>{this.state.buttonText}</button>
+            <div id="collapsible">
+                <fieldset>
+                    <label>
+                        Proteiinia vähintään (g/päivä):
+                        <input name="proteiini"
+                            value={this.state.proteiini}
+                            onChange={this.handleChange}
+                            type="number"/>
+                    </label>
+                </fieldset>
+            </div>
             <input type="submit" value="Laske" />
         </form>);
     }

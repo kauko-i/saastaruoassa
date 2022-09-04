@@ -4,7 +4,6 @@ import re
 from scipy.optimize import linprog
 import os
 import psycopg2
-from flask_wtf.csrf import CSRFProtect
 import asyncio
 import aiohttp
 from flask_cors import CORS

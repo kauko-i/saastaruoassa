@@ -6,7 +6,7 @@ class Laskuri extends React.PureComponent {
     constructor(props) {
         super(props);
         this.paivitaState = this.paivitaState.bind(this);
-        this.state = { viesti: '', lista: [], paivassa: '' };
+        this.state = { viesti: '', lista: [], paivassa: '', clahde: '' };
     }
 
     paivitaState(uusi) {
@@ -17,7 +17,7 @@ class Laskuri extends React.PureComponent {
         return (<div>
             <HenkiloLomake paivitaState={this.paivitaState}></HenkiloLomake>
             {(this.state.viesti || this.state.lista.length != 0) &&
-                <Tuloslista viesti={this.state.viesti} lista={this.state.lista} paivassa={this.state.paivassa}></Tuloslista>
+                <Tuloslista viesti={this.state.viesti} lista={this.state.lista} paivassa={this.state.paivassa} clahde={this.state.clahde}></Tuloslista>
             }
         </div>);
     }
@@ -94,7 +94,7 @@ class HenkiloLomake extends React.PureComponent {
             if (JSON.stringify(res) === '{}') {
                 this.props.paivitaState({viesti: 'Vaatimukset täyttävää kokonaisuutta ei löydy...', lista: []});
             } else {
-                this.props.paivitaState({viesti: '', lista: res.lista, paivassa: res.yhteensa});
+                this.props.paivitaState({viesti: '', lista: res.lista, paivassa: res.yhteensa, clahde: res.clahde});
             }
         });
         this.props.paivitaState({viesti: 'Luetaan hintoja...', lista: []});
@@ -189,6 +189,7 @@ class Tuloslista extends React.PureComponent {
             }
             </ul>
             <p>Yhteensä {Math.round(this.props.paivassa*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €/viikko!</p>
+            <p class="warning"><b>VAROITUS:</b> Valmistustapa vaikuttaa ravintoarvoihin. Esimerkiksi C-vitamiini hajoaa helposti kuumennettaessa, ja sen tärkein lähde tässä tuloksessa on {this.props.clahde}. Mikään ei myöskään todista, että ravitsemustutkimus olisi valmis. Laskurituloksen noudattaminen omalla vastuulla.</p>
         </div>;
     }
 }

@@ -18,3 +18,10 @@ form button {
     overflow: hidden;
     transition: max-height 0.2s ease-in;
 }
+
+.warning {
+    background: yellow;
+    border: solid 5px;
+    border-color: red;
+    padding: 5px;
+}

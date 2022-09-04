@@ -103,7 +103,8 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
     b = [ENERGIA_YLARAJA*energia,-energia]
     A = []
     # Seuraavissa 6 taulukossa indeksit vastaavat matriisin A rivejä (myöhemmin sarakkeita).
-    nimet = []
+    nominatiivit = []
+    partitiivit = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -111,6 +112,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
     laktoosia = []
     lihaa = []
     elainperainen = []
+    c_indeksi = 18
     with conn:
         with conn.cursor() as curs:
             # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
@@ -136,15 +138,16 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
                         dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi;''')
             for rivi in curs:
                 A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
-            # Hae ruokien tuoteosoitteet, partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
-            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege FROM arvot ORDER BY nimi;')
+            # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
+            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege,nimi FROM arvot ORDER BY nimi;')
             for rivi in curs:
                 osoitteet.append(rivi[0])
-                nimet.append(rivi[1])
+                partitiivit.append(rivi[1])
                 gluteenia.append(rivi[2])
                 laktoosia.append(rivi[3])
                 lihaa.append(rivi[4])
                 elainperainen.append(rivi[5])
+                nominatiivit.append(rivi[6])
     conn.close()
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
@@ -152,7 +155,8 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         if c[i] is None or (gluteenia[i] and keliakia) or (laktoosia[i] and laktoosi) or (lihaa[i] and kasvis) or (elainperainen[i] and vege):
             del c[i]
             del A[i]
-            del nimet[i]
+            del partitiivit[i]
+            del nominatiivit[i]
             del osoitteet[i]
 
     # Muuta A transpoosikseen.
@@ -171,6 +175,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         del A[I_INDEKSI]
         del A[B12_INDEKSI]
         del A[DHA_INDEKSI]
+        c_indeksi -= 2
     # Varsinainen laskenta
     try:
         res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
@@ -178,9 +183,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         return {}
     if not res.success:
         return {}
+    c_pitoisuudet = res.x * A[c_indeksi]
+    eniten_cta = min(list(range(len(res.x))), key=lambda i: c_pitoisuudet[i])
     hintavektori = res.x * c
-    palaute = [{'nimi': nimet[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
-    return { 'lista':palaute, 'yhteensa':res.fun }
+    palaute = [{'nimi': partitiivit[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
+    return { 'lista':palaute, 'yhteensa':res.fun, 'clahde': nominatiivit[eniten_cta] }
 
 # Hakee tietokannasta ruoka-aineiden nimet ja tuoteosoitteet käyttäjälle näytettäväksi.
 @app.route('/aineet')

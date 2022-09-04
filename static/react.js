@@ -19,8 +19,7 @@ class Laskuri extends React.PureComponent {
             {(this.state.viesti || this.state.lista.length != 0) &&
                 <Tuloslista viesti={this.state.viesti} lista={this.state.lista} paivassa={this.state.paivassa}></Tuloslista>
             }
-        </div>
-        );
+        </div>);
     }
 }
 
@@ -157,14 +156,12 @@ class HenkiloLomake extends React.PureComponent {
                     <label>
                         Proteiinia vähintään (g/päivä):
                         <input name="proteiini"
-                            value={this.state.proteiini}
                             onChange={this.handleChange}
                             type="number"/>
                     </label>
                     <label>
                         D-vitamiinin aurinkosaanti (μg/päivä):
                         <input name="d"
-                            value={this.state.d}
                             onChange={this.handleChange}
                             type="number"/>
                     </label>
@@ -186,7 +183,7 @@ class Tuloslista extends React.PureComponent {
         return <div>
             <p>Tulokset (viikottainen määrä):</p>
             <ul>{
-                this.props.lista.filter((aine) => aine.maara != 0).map(function (aine) {
+                this.props.lista.filter((aine) => Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA) != 0).map(function (aine) {
                     return <li key={aine.nimi}>{aine.nimi} {Math.round(aine.maara*PAIVAA_VIIKOSSA*GRAMMAA_HEHTOGRAMMASSA)} g <a href={''+aine.osoite}>({Math.round(aine.hinta*SENTTIA_EUROSSA*PAIVAA_VIIKOSSA)/SENTTIA_EUROSSA} €)</a></li>;
                 })
             }

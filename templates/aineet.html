@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="fi">
-<head><link rel="stylesheet" href="styles.css" />
+<head><link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 <title>Ruoka-aineet</title></head>
 <body>
+    <address>
+        © Ilari Kauko
+       <br>
+       Kysymykset ja palaute: ilarikauko@gmail.com
+    </address>
     <p>Laskenta perustuu seuraaviin ruoka-aineisiin: </p>
     <ul>
         {% for ruoka in data %}
             <li>{{ ruoka['nimi'] }} <a href="{{ruoka['osoite']}}">(tuote)</a></li>
         {% endfor %}
     </ul>
-    <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    </form>
 </body>
 </html>

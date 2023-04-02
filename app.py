@@ -3,10 +3,10 @@ from flask_caching import Cache
 import re
 from scipy.optimize import linprog
 import os
-import psycopg2
 import asyncio
 import aiohttp
-from flask_cors import CORS
+import mysql.connector
+
 
 # Välimuistin asetukset
 config = {
@@ -19,13 +19,12 @@ config = {
 app = Flask(__name__)
 app.config.from_mapping(config)
 cache = Cache(app)
-CORS(app)
 
 # Ohjelmaa koskevat vakiot
 JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
-DATABASE_URL = os.environ['DATABASE_URL']
+DATABASE_PASSWORD = os.environ['DATABASE_PASSWORD']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
 MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
@@ -92,7 +91,7 @@ def hinnat(osoitteet):
 Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi tulokseksi.
 Parametrit ovat samat kuin lomakkeella.
 '''
-def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, proteiini, d):
+def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=False, vege=False, proteiini=None, d=None):
     # Lomake käyttää kilokaloreita, tietokannat jouleja.
     energia = int(energia)*JOULEA_KALORISSA
 
@@ -107,7 +106,10 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
     partitiivit = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = mysql.connector.connect(user='root',
+                                   password=DATABASE_PASSWORD,
+                                   host='127.0.0.1',
+                                   database='saastaruoassa')
     gluteenia = []
     laktoosia = []
     lihaa = []
@@ -177,23 +179,19 @@ def syote2tulos(ika, sukupuoli, energia, keliakia, laktoosi, kasvis, vege, prote
         del A[DHA_INDEKSI]
         c_indeksi -= 2
     # Varsinainen laskenta
-    try:
-        res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
-    except ValueError:
-        return {}
-    if not res.success:
-        return {}
-    c_pitoisuudet = res.x * A[c_indeksi]
-    eniten_cta = min(list(range(len(res.x))), key=lambda i: c_pitoisuudet[i])
+    res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
     hintavektori = res.x * c
     palaute = [{'nimi': partitiivit[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
-    return { 'lista':palaute, 'yhteensa':res.fun, 'clahde': nominatiivit[eniten_cta] }
+    return { 'lista':palaute, 'yhteensa':sum(hintavektori), 'clahde': None }
 
 # Hakee tietokannasta ruoka-aineiden nimet ja tuoteosoitteet käyttäjälle näytettäväksi.
 @app.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = mysql.connector.connect(user='root',
+                                   password=DATABASE_PASSWORD,
+                                   host='127.0.0.1',
+                                   database='saastaruoassa')
     with conn:
         with conn.cursor() as curs:
             curs.execute('SELECT nimi, osoite FROM arvot;')
@@ -205,26 +203,28 @@ def aineet():
 # Etusivun näyttävä "pääohjelma"
 @app.route('/',methods=['GET','POST'])
 def index():
-    if request.method == 'POST':
-        req = request.json
-        res = syote2tulos(
-            req['ika'],
-            req['sukupuoli'],
-            req['energia'],
-            req['keliakia'],
-            req['laktoosi'],
-            req['kasvis'],
-            req['vegaani'],
-            req['proteiini'],
-            req['d']
-        )
-        return res
+    ika = request.args.get('ika')
+    sp = request.args.get('sp')
+    energia = request.args.get('energia')
+    tulos = []
+    if ika and sp and energia:
+        tulos = syote2tulos(ika, sp, energia)
+        for ruoka in tulos['lista']:
+            ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
+            ruoka['hinta'] = int(ruoka['hinta']*700 + 0.5)/100
+        tulos['yhteensa'] = int(tulos['yhteensa']*700 + 0.5)/100
+        tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
-    with psycopg2.connect(DATABASE_URL, sslmode='require') as conn:
+    with mysql.connector.connect(user='root',
+                                password=DATABASE_PASSWORD,
+                                host='127.0.0.1',
+                                database='saastaruoassa') as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
-            ikaryhmat = ','.join(sorted(set([x[0][1:] for x in curs.fetchall()]), key=int))
-    return render_template('etusivu.html', ryhmat=ikaryhmat)
+            alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
+            ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
+            ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+    return render_template('etusivu.html', ryhmat=ikaryhmat, tulos=tulos['lista'], yhteensa=tulos['yhteensa'])
 
 if __name__ == '__main__':
     app.debug = True

@@ -24,7 +24,11 @@ cache = Cache(app)
 JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
+DATABASE_USER = os.environ['DATABASE_USER']
 DATABASE_PASSWORD = os.environ['DATABASE_PASSWORD']
+DATABASE_NAME = os.environ['DATABASE_NAME']
+DATABASE_HOST = os.environ['DATABASE_HOST']
+DATABASE_PORT = os.environ['DATABASE_PORT']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
 MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
@@ -106,10 +110,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     partitiivit = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
-    conn = mysql.connector.connect(user='root',
+    conn = mysql.connector.connect(user=DATABASE_USER,
                                    password=DATABASE_PASSWORD,
-                                   host='127.0.0.1',
-                                   database='saastaruoassa')
+                                   host=DATABASE_HOST,
+                                   port=DATABASE_PORT,
+                                   database=DATABASE_NAME)
     gluteenia = []
     laktoosia = []
     lihaa = []
@@ -188,10 +193,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
 @app.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
-    conn = mysql.connector.connect(user='root',
+    conn = mysql.connector.connect(user=DATABASE_USER,
                                    password=DATABASE_PASSWORD,
-                                   host='127.0.0.1',
-                                   database='saastaruoassa')
+                                   host=DATABASE_HOST,
+                                   port=DATABASE_PORT,
+                                   database=DATABASE_NAME)
     with conn:
         with conn.cursor() as curs:
             curs.execute('SELECT nimi, osoite FROM arvot;')
@@ -206,7 +212,7 @@ def index():
     ika = request.args.get('ika')
     sp = request.args.get('sp')
     energia = request.args.get('energia')
-    tulos = []
+    tulos = None
     if ika and sp and energia:
         tulos = syote2tulos(ika, sp, energia)
         for ruoka in tulos['lista']:
@@ -215,16 +221,20 @@ def index():
         tulos['yhteensa'] = int(tulos['yhteensa']*700 + 0.5)/100
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
-    with mysql.connector.connect(user='root',
-                                password=DATABASE_PASSWORD,
-                                host='127.0.0.1',
-                                database='saastaruoassa') as conn:
+    with mysql.connector.connect(user=DATABASE_USER,
+                                 password=DATABASE_PASSWORD,
+                                 host=DATABASE_HOST,
+                                 port=DATABASE_PORT,
+                                 database=DATABASE_NAME) as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
             alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
             ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
             ikaryhmat.append('>{}'.format(str(alarajat[-1])))
-    return render_template('etusivu.html', ryhmat=ikaryhmat, tulos=tulos['lista'], yhteensa=tulos['yhteensa'])
+    return render_template('etusivu.html',
+                           ryhmat=ikaryhmat,
+                           tulos=tulos['lista'] if tulos else None,
+                           yhteensa=tulos['yhteensa'] if tulos else None)
 
 if __name__ == '__main__':
     app.debug = True

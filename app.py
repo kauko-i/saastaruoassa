@@ -212,9 +212,15 @@ def index():
     ika = request.args.get('ika')
     sp = request.args.get('sp')
     energia = request.args.get('energia')
+    keliakia = request.args.get('keliakia')
+    laktoosi = request.args.get('laktoosi')
+    kasvis = request.args.get('kasvis')
+    vegaani = request.args.get('vegaani')
+    proteiini = request.args.get('proteiini')
+    d = request.args.get('d')
     tulos = None
     if ika and sp and energia:
-        tulos = syote2tulos(ika, sp, energia)
+        tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
         for ruoka in tulos['lista']:
             ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
             ruoka['hinta'] = int(ruoka['hinta']*700 + 0.5)/100
@@ -233,6 +239,15 @@ def index():
             ikaryhmat.append('>{}'.format(str(alarajat[-1])))
     return render_template('etusivu.html',
                            ryhmat=ikaryhmat,
+                           ika=ika,
+                           sp=sp,
+                           energia=energia,
+                           keliakia=keliakia,
+                           laktoosi=laktoosi,
+                           kasvis=kasvis,
+                           vegaani=vegaani,
+                           proteiini=proteiini,
+                           d=d,
                            tulos=tulos['lista'] if tulos else None,
                            yhteensa=tulos['yhteensa'] if tulos else None)
 

@@ -17,18 +17,29 @@
       <fieldset>
         <label>Ikä: <select name="ika">
           {% for r in ryhmat %}
-            <option value="{{r}}">{{r}}</option>
+            <option value="{{r}}" {{ 'selected' if r == ika }}>{{r}}</option>
           {% endfor %}
         </select></label>
         <label>Sukupuoli: <select name="sp">
-          <option value="M">Mies</option>
-          <option value="N">Nainen</option>
+          <option value="M" {{ 'selected' if sp == 'M' }}>Mies</option>
+          <option value="N" {{ 'selected' if sp == 'N' }}>Nainen</option>
         </select></label>
         <label>Energiantarve (kcal/päivä): 
-          <input name="energia" type="number">
+          <input name="energia" type="number" required value="{{energia}}">
         </label>
-        <input type="submit" value="Laske!">
       </fieldset>
+      <fieldset>
+        <label><input name="keliakia" {{ 'checked' if keliakia }} type="checkbox">Keliakia</label>
+        <label><input name="laktoosi" {{ 'checked' if laktoosi }} type="checkbox">Laktoosi-intoleranssi</label>
+        <label><input name="kasvis" {{ 'checked' if kasvis }} type="checkbox">Kasvissyöjä</label>
+        <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">Vegaani</label>
+      </fieldset>
+      <fieldset>
+        <label>Proteiinin tarpeeni on (jos jätät tyhjäksi, laskuri käyttää virallista suositusta): <input name="proteiini" type="number" value="{{proteiini}}"></label>
+        <br>
+        <label>Tiedän saavani D-vitamiinia auringosta <input name="d" type="number" value="{{d}}"> µg/päivä. </label>
+      </fieldset>
+      <input type="submit" value="Laske!">
     </form>
     {% if tulos %}
       <p>Tulokset (viikottainen määrä):</p>
@@ -37,7 +48,7 @@
           <li>{{t.nimi}} {{t.maara}} g <a href="{{t.osoite}}">({{t.hinta}} €)</a></li>
         {% endfor %}
       </ul>
-      <p>Yhteensä {{yhteensa}} €!</p>
+      <p>Yhteensä {{yhteensa}} €/viikko!</p>
     {% endif %}
   </body>
 </html>

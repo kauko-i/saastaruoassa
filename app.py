@@ -5,8 +5,7 @@ from scipy.optimize import linprog
 import os
 import asyncio
 import aiohttp
-import mysql.connector
-
+import psycopg
 
 # Välimuistin asetukset
 config = {
@@ -24,11 +23,7 @@ cache = Cache(app)
 JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
-DATABASE_USER = os.environ['DATABASE_USER']
-DATABASE_PASSWORD = os.environ['DATABASE_PASSWORD']
-DATABASE_NAME = os.environ['DATABASE_NAME']
-DATABASE_HOST = os.environ['DATABASE_HOST']
-DATABASE_PORT = os.environ['DATABASE_PORT']
+DATABASE_URL = os.environ['DATABASE_URL']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
 MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
@@ -110,11 +105,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     partitiivit = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
-    conn = mysql.connector.connect(user=DATABASE_USER,
-                                   password=DATABASE_PASSWORD,
-                                   host=DATABASE_HOST,
-                                   port=DATABASE_PORT,
-                                   database=DATABASE_NAME)
+    conn = psycopg.connect(DATABASE_URL)
     gluteenia = []
     laktoosia = []
     lihaa = []
@@ -193,11 +184,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
 @app.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
-    conn = mysql.connector.connect(user=DATABASE_USER,
-                                   password=DATABASE_PASSWORD,
-                                   host=DATABASE_HOST,
-                                   port=DATABASE_PORT,
-                                   database=DATABASE_NAME)
+    conn = psycopg.connect(DATABASE_URL)
     with conn:
         with conn.cursor() as curs:
             curs.execute('SELECT nimi, osoite FROM arvot;')
@@ -207,7 +194,7 @@ def aineet():
     return render_template('aineet.html', data=nimetjaosoitteet)
 
 # Etusivun näyttävä "pääohjelma"
-@app.route('/',methods=['GET','POST'])
+@app.route('/')
 def index():
     ika = request.args.get('ika')
     sp = request.args.get('sp')
@@ -227,11 +214,7 @@ def index():
         tulos['yhteensa'] = int(tulos['yhteensa']*700 + 0.5)/100
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
-    with mysql.connector.connect(user=DATABASE_USER,
-                                 password=DATABASE_PASSWORD,
-                                 host=DATABASE_HOST,
-                                 port=DATABASE_PORT,
-                                 database=DATABASE_NAME) as conn:
+    with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
             alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)

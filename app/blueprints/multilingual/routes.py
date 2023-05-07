@@ -102,6 +102,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     laktoosia = []
     lihaa = []
     elainperainen = []
+    nominatiivit = []
     c_indeksi = 18
     with conn:
         with conn.cursor() as curs:
@@ -130,7 +131,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
                 A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
             # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
             locale = str(flask_babel.get_locale())
-            curs.execute(sql.SQL('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege FROM arvot ORDER BY nimi_fi;').format(sql.Identifier(f'partitiivi_{locale}')))
+            curs.execute(sql.SQL('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY nimi_fi;').format(sql.Identifier(f'partitiivi_{locale}'),sql.Identifier(f'nimi_{locale}')))
             for rivi in curs:
                 osoitteet.append(rivi[0])
                 partitiivit.append(rivi[1])
@@ -138,6 +139,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
                 laktoosia.append(rivi[3])
                 lihaa.append(rivi[4])
                 elainperainen.append(rivi[5])
+                nominatiivit.append(rivi[6])
     conn.close()
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
@@ -147,6 +149,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             del A[i]
             del partitiivit[i]
             del osoitteet[i]
+            del nominatiivit[i]
 
     # Muuta A transpoosikseen.
     A = t(A)
@@ -168,8 +171,9 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     # Varsinainen laskenta
     res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
     hintavektori = res.x * c
+    c_maarat = res.x * A[c_indeksi]
     palaute = [{'nimi': partitiivit[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
-    return { 'lista':palaute, 'yhteensa':sum(hintavektori), 'clahde': None }
+    return { 'lista':palaute, 'yhteensa':sum(hintavektori), 'clahde': nominatiivit[min(range(len(c_maarat)), key=c_maarat.__getitem__)] }
 
 @multilingual.url_defaults
 def add_language_code(endpoint, values):
@@ -237,4 +241,5 @@ def index():
                            proteiini=proteiini,
                            d=d,
                            tulos=tulos['lista'] if tulos else None,
-                           yhteensa=tulos['yhteensa'] if tulos else None)
+                           yhteensa=tulos['yhteensa'] if tulos else None,
+                           clahde=tulos['clahde'] if tulos else None)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-07 20:46+0300\n"
+"POT-Creation-Date: 2023-05-07 21:09+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -131,6 +131,22 @@ msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
 msgid "per week!"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid "WARNING:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid ""
+"certain processes destroy certain nutritients. For example, vitamin C "
+"gets easily destroyed when heated up, and its most essential source is"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid ""
+"in this result. Furthermore, nothing proves the nutritional research to "
+"be ready. You follow the result at your own risk."
 msgstr ""
 
 #: app/templates/base.html:6

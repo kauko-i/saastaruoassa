@@ -130,6 +130,22 @@ msgstr "Yhteensä"
 msgid "per week!"
 msgstr "/ viikko!"
 
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid "WARNING:"
+msgstr "VAROITUS:"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid ""
+"certain processes destroy certain nutritients. For example, vitamin C "
+"gets easily destroyed when heated up, and its most essential source is"
+msgstr "Valmistustapa vaikuttaa ravintoarvoihin. Esimerkiksi C-vitamiini hajoaa helposti kuumennettaessa, ja sen tärkein lähde on"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+msgid ""
+"in this result. Furthermore, nothing proves the nutritional research to "
+"be ready. You follow the result at your own risk."
+msgstr "tässä tuloksessa. Mikään ei myöskään todista, että ravitsemustutkimus olisi valmis. Laskurituloksen noudattaminen omalla vastuulla."
+
 #: app/templates/aineet.html:4
 msgid "Back to the main page"
 msgstr "Palaa etusivulle"

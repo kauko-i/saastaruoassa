@@ -5,7 +5,8 @@ import os
 import asyncio
 import aiohttp
 import psycopg
-from flask_babel import Babel, _
+from psycopg import sql
+import flask_babel
 from app import cache, app
 
 multilingual = Blueprint('multilingual', __name__, template_folder='templates', url_prefix='/<lang_code>')
@@ -124,11 +125,12 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
 
             # Hae ravintoarvot.
             curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
-                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi;''')
+                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
             for rivi in curs:
                 A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
             # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
-            curs.execute('SELECT osoite,partitiivi,gluteenia,laktoosia,eikasvis,eivege,nimi FROM arvot ORDER BY nimi;')
+            locale = str(flask_babel.get_locale())
+            curs.execute(sql.SQL('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege FROM arvot ORDER BY nimi_fi;').format(sql.Identifier(f'partitiivi_{locale}')))
             for rivi in curs:
                 osoitteet.append(rivi[0])
                 partitiivit.append(rivi[1])
@@ -136,7 +138,6 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
                 laktoosia.append(rivi[3])
                 lihaa.append(rivi[4])
                 elainperainen.append(rivi[5])
-                nominatiivit.append(rivi[6])
     conn.close()
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
@@ -145,7 +146,6 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             del c[i]
             del A[i]
             del partitiivit[i]
-            del nominatiivit[i]
             del osoitteet[i]
 
     # Muuta A transpoosikseen.
@@ -189,9 +189,10 @@ def before_request():
 def aineet():
     nimetjaosoitteet = []
     conn = psycopg.connect(DATABASE_URL)
+    locale = str(flask_babel.get_locale())
     with conn:
         with conn.cursor() as curs:
-            curs.execute('SELECT nimi, osoite FROM arvot;')
+            curs.execute(sql.SQL('SELECT {0}, osoite FROM arvot ORDER BY {0};').format(sql.Identifier(f'nimi_{locale}')))
             for rivi in curs:
                 nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
     conn.close()

@@ -36,7 +36,7 @@
       <p>Tulokset (viikottainen määrä):</p>
       <ul>
         {% for t in tulos %}
-          <li>{{t.nimi}} {{t.maara}} g <a href="{{t.osoite}}">({{t.hinta}} €)</a></li>
+          <li>{{t.maara}} g {{t.nimi}} <a href="{{t.osoite}}">({{t.hinta}} €)</a></li>
         {% endfor %}
       </ul>
       <p>Yhteensä {{yhteensa}} €/viikko!</p>

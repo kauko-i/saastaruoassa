@@ -29,7 +29,7 @@
         <label><input name="keliakia" {{ 'checked' if keliakia }} type="checkbox">{{_('Celiac')}}</label>
         <label><input name="laktoosi" {{ 'checked' if laktoosi }} type="checkbox">{{_('Lactose intolerant')}}</label>
         <label><input name="kasvis" {{ 'checked' if kasvis }} type="checkbox">{{_('Vegetarian')}}</label>
-        <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">{{_('Vegan')}}</label>
+        <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">{{_('Vegan (if you check, the calculator will ignore iodine, vitamin B12, and docosahexaenoic acid)')}}</label>
       </fieldset>
       <fieldset>
         <label>{{_('My needed protein intake is (g/day, the official recommendation will be used if you leave this empty):')}} <input name="proteiini" type="number" value="{{proteiini}}"></label>

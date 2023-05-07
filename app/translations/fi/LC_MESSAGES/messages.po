@@ -97,8 +97,10 @@ msgid "Vegetarian"
 msgstr "Kasvissyöjä"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:32
-msgid "Vegan"
-msgstr "Vegaani"
+msgid ""
+"Vegan (if you check, the calculator will ignore iodine, vitamin B12, and "
+"docosahexaenoic acid)"
+msgstr "Vegaani (jos ruksaat, laskuri sivuuttaa jodin, B12-vitamiinin ja DHA-rasvahapon)"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:35
 msgid ""

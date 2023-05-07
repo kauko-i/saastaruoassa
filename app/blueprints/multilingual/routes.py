@@ -1,23 +1,14 @@
-from flask import Flask, render_template, request
-from flask_caching import Cache
+from flask import render_template, request, Blueprint, g, abort
 import re
 from scipy.optimize import linprog
 import os
 import asyncio
 import aiohttp
 import psycopg
+from flask_babel import Babel, _
+from app import cache, app
 
-# Välimuistin asetukset
-config = {
-    "DEBUG": False,
-    "CACHE_TYPE": "SimpleCache",
-    "CORS_HEADERS": "application/json",
-}
-
-# Alusta sovellus.
-app = Flask(__name__)
-app.config.from_mapping(config)
-cache = Cache(app)
+multilingual = Blueprint('multilingual', __name__, template_folder='templates', url_prefix='/<lang_code>')
 
 # Ohjelmaa koskevat vakiot
 JOULEA_KALORISSA = 4.18
@@ -180,8 +171,21 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     palaute = [{'nimi': partitiivit[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]
     return { 'lista':palaute, 'yhteensa':sum(hintavektori), 'clahde': None }
 
+@multilingual.url_defaults
+def add_language_code(endpoint, values):
+    values.setdefault('lang_code', g.lang_code)
+
+@multilingual.url_value_preprocessor
+def pull_lang_code(endpoint, values):
+    g.lang_code = values.pop('lang_code')
+
+@multilingual.before_request
+def before_request():
+    if g.lang_code not in app.config['LANGUAGES']:
+        abort(404)
+
 # Hakee tietokannasta ruoka-aineiden nimet ja tuoteosoitteet käyttäjälle näytettäväksi.
-@app.route('/aineet')
+@multilingual.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
     conn = psycopg.connect(DATABASE_URL)
@@ -191,10 +195,10 @@ def aineet():
             for rivi in curs:
                 nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
     conn.close()
-    return render_template('aineet.html', data=nimetjaosoitteet)
+    return render_template('multilingual/aineet.html', data=nimetjaosoitteet)
 
 # Etusivun näyttävä "pääohjelma"
-@app.route('/')
+@multilingual.route('/')
 def index():
     ika = request.args.get('ika')
     sp = request.args.get('sp')
@@ -217,10 +221,10 @@ def index():
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
-            alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
-            ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
-            ikaryhmat.append('>{}'.format(str(alarajat[-1])))
-    return render_template('etusivu.html',
+    alarajat = sorted(['2', '6', '10', '14', '18', '31', '61', '65', '75'], key=int)
+    ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
+    ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+    return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
                            ika=ika,
                            sp=sp,
@@ -233,7 +237,3 @@ def index():
                            d=d,
                            tulos=tulos['lista'] if tulos else None,
                            yhteensa=tulos['yhteensa'] if tulos else None)
-
-if __name__ == '__main__':
-    app.debug = True
-    app.run(host='0.0.0.0')

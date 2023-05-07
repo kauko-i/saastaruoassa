@@ -1,0 +1,32 @@
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }}</title>
+        {% else %}
+        <title>{{_('Save in food')}}</title>
+        {% endif %}
+    </head>
+    <body>
+        {% if g.lang_code != 'en' %}
+            <a href="{{ url_for(request.endpoint, lang_code='en') }}">In English</a>&nbsp;
+        {% else %}
+            <b>In English</b>&nbsp;
+        {% endif %}
+        {% if g.lang_code != 'fi' %}
+            <a href="{{ url_for(request.endpoint, lang_code='fi') }}">Suomeksi</a>&nbsp;
+        {% else %}
+            <b>Suomeksi</b>&nbsp;
+        {% endif %}
+        {% if g.lang_code != 'se' %}
+            <a href="{{ url_for(request.endpoint, lang_code='se') }}">På svenska</a>&nbsp;
+        {% else %}
+            <b>På svenska</b>&nbsp;
+        {% endif %}
+        <address>
+            © Ilari Kauko
+            <br>
+            Kysymykset ja palaute: ilarikauko@gmail.com
+        </address>
+        {% block content %}{% endblock %}
+    </body>
+</html>

@@ -122,11 +122,11 @@ msgid "The results (weekly portion)"
 msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
-msgid "Togheter"
+msgid "Together"
 msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
-msgid "euros per week!"
+msgid "per week!"
 msgstr ""
 
 #: app/templates/base.html:6

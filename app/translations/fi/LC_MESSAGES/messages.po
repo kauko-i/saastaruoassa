@@ -127,8 +127,8 @@ msgid "Togheter"
 msgstr "Yhteensä"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
-msgid "euros per week!"
-msgstr "€/viikko!"
+msgid "per week!"
+msgstr "/ viikko!"
 
 #: app/templates/base.html:6
 msgid "Save in food"

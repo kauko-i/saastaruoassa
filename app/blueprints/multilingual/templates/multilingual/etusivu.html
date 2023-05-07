@@ -42,9 +42,9 @@
       <p>{{_('The results (weekly portion)')}}:</p>
       <ul>
         {% for t in tulos %}
-          <li>{{t.maara}} g {{t.nimi}} <a href="{{t.osoite}}">({{t.hinta}} €)</a></li>
+          <li>{{t.maara}} g {{t.nimi}} <a href="{{t.osoite}}">({{t.hinta}})</a></li>
         {% endfor %}
       </ul>
-      <p>{{_('Togheter')}} {{yhteensa}} {{_('euros per week!')}}</p>
+      <p>{{_('Together')}} {{yhteensa}} {{_('per week!')}}</p>
     {% endif %}
 {% endblock %}

@@ -215,8 +215,8 @@ def index():
         tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
         for ruoka in tulos['lista']:
             ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
-            ruoka['hinta'] = int(ruoka['hinta']*700 + 0.5)/100
-        tulos['yhteensa'] = int(tulos['yhteensa']*700 + 0.5)/100
+            ruoka['hinta'] = flask_babel.format_currency(int(ruoka['hinta']*700 + 0.5)/100, 'EUR')
+        tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
     with psycopg.connect(DATABASE_URL) as conn:

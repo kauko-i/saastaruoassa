@@ -130,6 +130,10 @@ msgstr "Yhteensä"
 msgid "per week!"
 msgstr "/ viikko!"
 
+#: app/templates/aineet.html:4
+msgid "Back to the main page"
+msgstr "Palaa etusivulle"
+
 #: app/templates/base.html:6
 msgid "Save in Food"
 msgstr "Säästä ruoassa"

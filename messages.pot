@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-07 19:09+0300\n"
+"POT-Creation-Date: 2023-05-07 20:46+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,14 @@ msgstr ""
 "Generated-By: Babel 2.8.0\n"
 
 #: app/blueprints/multilingual/templates/multilingual/aineet.html:4
+msgid "Back to the main page"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:5
 msgid "The calculation is based on the following foods:"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/aineet.html:7
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:8
 msgid "product"
 msgstr ""
 

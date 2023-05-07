@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <p><a href="."><< {{_('Back to the main page')}}</a></p>
     <p>{{_('The calculation is based on the following foods:')}}</p>
     <ul>
         {% for ruoka in data %}

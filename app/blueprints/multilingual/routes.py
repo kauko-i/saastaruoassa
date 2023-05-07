@@ -221,9 +221,9 @@ def index():
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as curs:
             curs.execute('SELECT ryhma FROM saannit;')
-    alarajat = sorted(['2', '6', '10', '14', '18', '31', '61', '65', '75'], key=int)
-    ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
-    ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+            alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
+            ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
+            ikaryhmat.append('>{}'.format(str(alarajat[-1])))
     return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
                            ika=ika,

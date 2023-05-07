@@ -17,11 +17,6 @@
         {% else %}
             <b>Suomeksi</b>&nbsp;
         {% endif %}
-        {% if g.lang_code != 'se' %}
-            <a href="{{ url_for(request.endpoint, lang_code='se') }}">På svenska</a>&nbsp;
-        {% else %}
-            <b>På svenska</b>&nbsp;
-        {% endif %}
         <address>
             © Ilari Kauko
             <br>

@@ -123,7 +123,7 @@ msgid "The results (weekly portion)"
 msgstr "Tulokset (viikottainen määrä)"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
-msgid "Togheter"
+msgid "Together"
 msgstr "Yhteensä"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:48

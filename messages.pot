@@ -130,7 +130,7 @@ msgid "per week!"
 msgstr ""
 
 #: app/templates/base.html:6
-msgid "Save in food"
+msgid "Save in Food"
 msgstr ""
 
 #: app/templates/base.html:23

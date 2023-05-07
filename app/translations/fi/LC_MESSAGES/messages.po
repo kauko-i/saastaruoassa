@@ -131,7 +131,7 @@ msgid "per week!"
 msgstr "/ viikko!"
 
 #: app/templates/base.html:6
-msgid "Save in food"
+msgid "Save in Food"
 msgstr "Säästä ruoassa"
 
 #: app/templates/base.html:23

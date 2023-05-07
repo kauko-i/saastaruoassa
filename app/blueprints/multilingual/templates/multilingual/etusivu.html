@@ -2,43 +2,49 @@
 
 {% block content %}
     <h1>{{_('Calculate your cheapest way to fulfill your nutritional recommendations!')}}</h1>
-    <p>Laskuri perustuu <a href="aineet">50</a> ruoka-aineen <a href="http://www.fineli.fi/">ravintoarvoihin</a>, niiden keskimääräisiin <a href="https://www.s-kaupat.fi/">hintoihin</a> Prismoissa, valtion ravitsemusneuvottelukunnan <a href="https://www.ruokavirasto.fi/globalassets/teemat/terveytta-edistava-ruokavalio/kuluttaja-ja-ammattilaismateriaali/julkaisut/ravitsemussuositukset_2014_fi_web_versio_5.pdf">suosituksiin</a> vitamiinien, kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista ja <a href="https://en.wikipedia.org/wiki/Linear_programming">lineaariseen optimointiin</a>.</p>
-    <p>Syötä tietosi:</p>
+    <p>{{_('The calculator is based on:')}}</p>
+    <ul>
+      <li><a href="http://www.fineli.fi/">{{_('the nutritional values of 50 groceries')}}</a> (<a href="aineet">{{_('list of them')}}</a>),</li>
+      <li><a href="https://www.s-kaupat.fi/">{{_('their average prices in the Prisma stores in Finland')}}</a>,</li>
+      <li><a href="https://www.ruokavirasto.fi/globalassets/teemat/terveytta-edistava-ruokavalio/kuluttaja-ja-ammattilaismateriaali/julkaisut/ravitsemussuositukset_2014_fi_web_versio_5.pdf">{{_('the official Finnish recommendations about the intake of vitamins, minerals, fibre, protein and fats')}}</a> {{_('and')}}</li>
+      <li><a href="https://en.wikipedia.org/wiki/Linear_programming">{{_('linear optimization')}}</a>.</li>
+    </ul>
+    <p>{{_('Enter the required information:')}}</p>
     <form>
       <fieldset>
-        <label>Ikä: <select name="ika">
+        <label>{{_('Age:')}} <select name="ika">
           {% for r in ryhmat %}
             <option value="{{r}}" {{ 'selected' if r == ika }}>{{r}}</option>
           {% endfor %}
         </select></label>
-        <label>Sukupuoli: <select name="sp">
-          <option value="M" {{ 'selected' if sp == 'M' }}>Mies</option>
-          <option value="N" {{ 'selected' if sp == 'N' }}>Nainen</option>
+        <label>{{_('Gender:')}} <select name="sp">
+          <option value="M" {{ 'selected' if sp == 'M' }}>{{_('Male')}}</option>
+          <option value="N" {{ 'selected' if sp == 'N' }}>{{_('Female')}}</option>
         </select></label>
-        <label>Energiantarve (kcal/päivä): 
+        <label>{{_('Energy consumption (kcal/day):')}}
           <input name="energia" type="number" required value="{{energia}}">
         </label>
       </fieldset>
       <fieldset>
-        <label><input name="keliakia" {{ 'checked' if keliakia }} type="checkbox">Keliakia</label>
-        <label><input name="laktoosi" {{ 'checked' if laktoosi }} type="checkbox">Laktoosi-intoleranssi</label>
-        <label><input name="kasvis" {{ 'checked' if kasvis }} type="checkbox">Kasvissyöjä</label>
-        <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">Vegaani</label>
+        <label><input name="keliakia" {{ 'checked' if keliakia }} type="checkbox">{{_('Celiac')}}</label>
+        <label><input name="laktoosi" {{ 'checked' if laktoosi }} type="checkbox">{{_('Lactose intolerant')}}</label>
+        <label><input name="kasvis" {{ 'checked' if kasvis }} type="checkbox">{{_('Vegetarian')}}</label>
+        <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">{{_('Vegan')}}</label>
       </fieldset>
       <fieldset>
-        <label>Proteiinin tarpeeni on (jos jätät tyhjäksi, laskuri käyttää virallista suositusta): <input name="proteiini" type="number" value="{{proteiini}}"></label>
+        <label>{{_('My needed protein intake is (g/day, the official recommendation will be used if you leave this empty):')}} <input name="proteiini" type="number" value="{{proteiini}}"></label>
         <br>
-        <label>Tiedän saavani D-vitamiinia auringosta <input name="d" type="number" value="{{d}}"> µg/päivä. </label>
+        <label>{{_('I know I get')}} <input name="d" type="number" value="{{d}}"> {{_('µg of vitamin D from the sun per day.')}}</label>
       </fieldset>
-      <input type="submit" value="Laske!">
+      <input type="submit" value="{{_('Calculate!')}}">
     </form>
     {% if tulos %}
-      <p>Tulokset (viikottainen määrä):</p>
+      <p>{{_('The results (weekly portion)')}}:</p>
       <ul>
         {% for t in tulos %}
           <li>{{t.maara}} g {{t.nimi}} <a href="{{t.osoite}}">({{t.hinta}} €)</a></li>
         {% endfor %}
       </ul>
-      <p>Yhteensä {{yhteensa}} €/viikko!</p>
+      <p>{{_('Togheter')}} {{yhteensa}} {{_('euros per week!')}}</p>
     {% endif %}
 {% endblock %}

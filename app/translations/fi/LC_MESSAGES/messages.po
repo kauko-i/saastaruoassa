@@ -7,26 +7,134 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-09 19:00+0300\n"
-"PO-Revision-Date: 2023-04-09 19:01+0300\n"
+"POT-Creation-Date: 2023-05-07 19:09+0300\n"
+"PO-Revision-Date: 2023-05-07 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
 "Language-Team: fi <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
-
-#: app/blueprints/multilingual/routes.py:250 app/templates/base.html:6
-msgid "Save in food"
-msgstr "Säästä ruoassa"
+"Generated-By: Babel 2.8.0\n"
 
 #: app/blueprints/multilingual/templates/multilingual/aineet.html:4
-msgid "The calculation is based on the following foods"
-msgstr "Laskenta perustuu seuraaviin ruokiin"
+msgid "The calculation is based on the following foods:"
+msgstr "Laskenta perustuu seuraaviin ruoka-aineisiin:"
+
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:7
+msgid "product"
+msgstr "tuote"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:4
 msgid "Calculate your cheapest way to fulfill your nutritional recommendations!"
 msgstr "Laske, kuinka täytät ravitsemussuositukset halvimmalla!"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:5
+msgid "The calculator is based on:"
+msgstr "Laskuri perustuu:"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:7
+msgid "the nutritional values of 50 groceries"
+msgstr "50 ruoka-aineen ravintoarvoihin"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:7
+msgid "list of them"
+msgstr "lista niistä"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:8
+msgid "their average prices in the Prisma stores in Finland"
+msgstr "niiden keskimääräisiin hintoihin Prismoissa"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:9
+msgid ""
+"the official Finnish recommendations about the intake of vitamins, "
+"minerals, fibre, protein and fats"
+msgstr "valtion ravitsemusneuvottelukunnan suosituksiin vitamiinien, kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:9
+msgid "and"
+msgstr "ja"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:10
+msgid "linear optimization"
+msgstr "lineaariseen optimointiin"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:12
+msgid "Enter the required information:"
+msgstr "Syötä tarvittavat tiedot:"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:15
+msgid "Age:"
+msgstr "Ikä:"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:20
+msgid "Gender:"
+msgstr "Sukupuoli:"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:21
+msgid "Male"
+msgstr "Mies"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:22
+msgid "Female"
+msgstr "Nainen"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:24
+msgid "Energy consumption (kcal/day):"
+msgstr "Energiantarve (kcal/päivä)"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:29
+msgid "Celiac"
+msgstr "Keliakia"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:30
+msgid "Lactose intolerant"
+msgstr "Laktoosi-intoleranssi"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:31
+msgid "Vegetarian"
+msgstr "Kasvissyöjä"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:32
+msgid "Vegan"
+msgstr "Vegaani"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:35
+msgid ""
+"My needed protein intake is (g/day, the official recommendation will be "
+"used if you leave this empty):"
+msgstr "Proteiinin tarpeeni on (g/päivä, käytetään virallista suositusta, jos jätät tyhjäksi):"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+msgid "I know I get"
+msgstr "Tiedän saavani"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+msgid "µg of vitamin D from the sun per day."
+msgstr "µg D-vitamiinia auringosta päivässä."
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:39
+msgid "Calculate!"
+msgstr "Laske!"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:42
+msgid "The results (weekly portion)"
+msgstr "Tulokset (viikottainen määrä)"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+msgid "Togheter"
+msgstr "Yhteensä"
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+msgid "euros per week!"
+msgstr "€/viikko!"
+
+#: app/templates/base.html:6
+msgid "Save in food"
+msgstr "Säästä ruoassa"
+
+#: app/templates/base.html:23
+msgid "Questions and feedback"
+msgstr "Kysymykset ja palaute"
 

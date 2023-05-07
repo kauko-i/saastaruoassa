@@ -8,24 +8,132 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-09 19:00+0300\n"
+"POT-Creation-Date: 2023-05-07 19:09+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
-
-#: app/blueprints/multilingual/routes.py:250 app/templates/base.html:6
-msgid "Save in food"
-msgstr ""
+"Generated-By: Babel 2.8.0\n"
 
 #: app/blueprints/multilingual/templates/multilingual/aineet.html:4
-msgid "The calculation is based on the following foods"
+msgid "The calculation is based on the following foods:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:7
+msgid "product"
 msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:4
 msgid "Calculate your cheapest way to fulfill your nutritional recommendations!"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:5
+msgid "The calculator is based on:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:7
+msgid "the nutritional values of 50 groceries"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:7
+msgid "list of them"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:8
+msgid "their average prices in the Prisma stores in Finland"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:9
+msgid ""
+"the official Finnish recommendations about the intake of vitamins, "
+"minerals, fibre, protein and fats"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:9
+msgid "and"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:10
+msgid "linear optimization"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:12
+msgid "Enter the required information:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:15
+msgid "Age:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:20
+msgid "Gender:"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:21
+msgid "Male"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:22
+msgid "Female"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:24
+msgid "Energy consumption (kcal/day):"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:29
+msgid "Celiac"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:30
+msgid "Lactose intolerant"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:31
+msgid "Vegetarian"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:32
+msgid "Vegan"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:35
+msgid ""
+"My needed protein intake is (g/day, the official recommendation will be "
+"used if you leave this empty):"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+msgid "I know I get"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+msgid "µg of vitamin D from the sun per day."
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:39
+msgid "Calculate!"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:42
+msgid "The results (weekly portion)"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+msgid "Togheter"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+msgid "euros per week!"
+msgstr ""
+
+#: app/templates/base.html:6
+msgid "Save in food"
+msgstr ""
+
+#: app/templates/base.html:23
+msgid "Questions and feedback"
 msgstr ""
 

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <p>{{_('The calculation is based on the following foods')}}</p>
+    <p>{{_('The calculation is based on the following foods:')}}</p>
     <ul>
         {% for ruoka in data %}
-            <li>{{ ruoka['nimi'] }} <a href="{{ruoka['osoite']}}">(tuote)</a></li>
+            <li>{{ ruoka['nimi'] }} <a href="{{ruoka['osoite']}}">({{_('product')}})</a></li>
         {% endfor %}
     </ul>
 {% endblock %}

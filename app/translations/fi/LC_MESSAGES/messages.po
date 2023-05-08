@@ -27,7 +27,7 @@ msgid "product"
 msgstr "tuote"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:4
-msgid "Calculate your cheapest way to fulfill your nutritional recommendations!"
+msgid "Calculate your cheapest way to fulfill the nutritional recommendations!"
 msgstr "Laske, kuinka täytät ravitsemussuositukset halvimmalla!"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:5
@@ -82,7 +82,7 @@ msgstr "Nainen"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:24
 msgid "Energy consumption (kcal/day):"
-msgstr "Energiantarve (kcal/päivä)"
+msgstr "Energiantarve (kcal/päivä):"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:29
 msgid "Celiac"
@@ -138,7 +138,7 @@ msgstr "VAROITUS:"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
 msgid ""
-"certain processes destroy certain nutrients. For example, vitamin C gets "
+"Certain processes destroy certain nutrients. For example, vitamin C gets "
 "easily destroyed when heated up, and its most essential source is"
 msgstr "Valmistustapa vaikuttaa ravintoarvoihin. Esimerkiksi C-vitamiini hajoaa helposti kuumennettaessa, ja sen tärkein lähde on"
 

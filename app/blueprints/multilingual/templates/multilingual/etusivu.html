@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{_('Calculate your cheapest way to fulfill your nutritional recommendations!')}}</h1>
+    <h1>{{_('Calculate your cheapest way to fulfill the nutritional recommendations!')}}</h1>
     <p>{{_('The calculator is based on:')}}</p>
     <ul>
       <li><a href="http://www.fineli.fi/">{{_('the nutritional values of 50 groceries')}}</a> (<a href="aineet">{{_('list of them')}}</a>),</li>
@@ -46,6 +46,6 @@
         {% endfor %}
       </ul>
       <p>{{_('Together')}} {{yhteensa}} {{_('per week!')}}</p>
-      <p><b>{{_('WARNING:')}}</b> {{_('certain processes destroy certain nutrients. For example, vitamin C gets easily destroyed when heated up, and its most essential source is')}} {{clahde}} {{_('in these results. Furthermore, nothing proves the nutritional research to be ready. You follow the results at your own risk.')}}</p>
+      <p><b>{{_('WARNING:')}}</b> {{_('Certain processes destroy certain nutrients. For example, vitamin C gets easily destroyed when heated up, and its most essential source is')}} {{clahde}} {{_('in these results. Furthermore, nothing proves the nutritional research to be ready. You follow the results at your own risk.')}}</p>
     {% endif %}
 {% endblock %}

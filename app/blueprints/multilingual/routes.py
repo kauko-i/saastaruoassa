@@ -194,11 +194,14 @@ def aineet():
     nimetjaosoitteet = []
     conn = psycopg.connect(DATABASE_URL)
     locale = str(flask_babel.get_locale())
-    with conn:
-        with conn.cursor() as curs:
-            curs.execute(sql.SQL('SELECT {0}, osoite FROM arvot ORDER BY {0};').format(sql.Identifier(f'nimi_{locale}')))
-            for rivi in curs:
-                nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
+    try:
+        with conn:
+            with conn.cursor() as curs:
+                curs.execute(sql.SQL('SELECT {0}, osoite FROM arvot ORDER BY {0};').format(sql.Identifier(f'nimi_{locale}')))
+                for rivi in curs:
+                    nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
+    except psycopg.OperationalError:
+        return render_template('multilingual/error.html')
     conn.close()
     return render_template('multilingual/aineet.html', data=nimetjaosoitteet)
 
@@ -216,19 +219,25 @@ def index():
     d = request.args.get('d')
     tulos = None
     if ika and sp and energia:
-        tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
+        try:
+            tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
+        except psycopg.OperationalError:
+            return render_template('multilingual/error.html')
         for ruoka in tulos['lista']:
             ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
             ruoka['hinta'] = flask_babel.format_currency(int(ruoka['hinta']*700 + 0.5)/100, 'EUR')
         tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
-    with psycopg.connect(DATABASE_URL) as conn:
-        with conn.cursor() as curs:
-            curs.execute('SELECT ryhma FROM saannit;')
-            alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
-            ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
-            ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+    try:
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as curs:
+                curs.execute('SELECT ryhma FROM saannit;')
+                alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
+                ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
+                ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+    except psycopg.OperationalError:
+        return render_template('multilingual/error.html')
     return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
                            ika=ika,

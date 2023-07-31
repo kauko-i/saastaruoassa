@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-08 19:39+0300\n"
+"POT-Creation-Date: 2023-07-31 18:45+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,12 @@ msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/aineet.html:8
 msgid "product"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/error.html:4
+msgid ""
+"The database is unreacable. The creator of this site will feel ashamed if"
+" they can't fix this within a couple of days."
 msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:4

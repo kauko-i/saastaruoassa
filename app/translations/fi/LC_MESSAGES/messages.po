@@ -28,7 +28,7 @@ msgstr "tuote"
 
 #: app/blueprints/multilingual/templates/multilingual/error.html:4
 msgid ""
-"The database is unreacable. The creator of this site will feel ashamed if"
+"The database is unreachable. The creator of this site will feel ashamed if"
 " they can't fix this within a couple of days."
 msgstr "Tietokantaan ei saada yhteyttä. Tämän sivuston luoja tuntee häpeää, ellei saa tätä parissa päivässä korjattua."
 

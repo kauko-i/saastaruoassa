@@ -128,8 +128,10 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         for rivi in curs:
             A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
         # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
-        locale = str(flask_babel.get_locale())
-        curs.execute('SELECT osoite,partitiivi_fi,gluteenia,laktoosia,eikasvis,eivege,nimi_fi FROM arvot ORDER BY nimi_fi;')
+        if str(flask_babel.get_locale()) == 'fi':
+            curs.execute('SELECT osoite,partitiivi_fi,gluteenia,laktoosia,eikasvis,eivege,nimi_fi FROM arvot ORDER BY nimi_fi;')
+        else:
+            curs.execute('SELECT osoite,partitiivi_en,gluteenia,laktoosia,eikasvis,eivege,nimi_en FROM arvot ORDER BY nimi_fi;')
         for rivi in curs:
             osoitteet.append(rivi[0])
             partitiivit.append(rivi[1])
@@ -190,10 +192,12 @@ def before_request():
 @multilingual.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
-    locale = str(flask_babel.get_locale())
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()
-        curs.execute('SELECT nimi_fi, osoite FROM arvot ORDER BY nimi_fi;')
+        if str(flask_babel.get_locale()) == 'fi':
+            curs.execute('SELECT nimi_fi, osoite FROM arvot ORDER BY nimi_fi;')
+        else:
+            curs.execute('SELECT nimi_en, osoite FROM arvot ORDER BY nimi_fi;')
         for rivi in curs:
             nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
         curs.close()

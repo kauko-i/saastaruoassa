@@ -4,8 +4,7 @@ from scipy.optimize import linprog
 import os
 import asyncio
 import aiohttp
-import psycopg
-from psycopg import sql
+import sqlite3
 import flask_babel
 from app import cache, app
 
@@ -15,7 +14,7 @@ multilingual = Blueprint('multilingual', __name__, template_folder='templates', 
 JOULEA_KALORISSA = 4.18
 RASVAN_ENERGIA = 0.037
 PROTEIININ_ENERGIA = 0.017
-DATABASE_URL = os.environ['DATABASE_URL']
+DATABASE_NAME = os.environ['DATABASE_NAME']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
 MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
@@ -97,50 +96,49 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     partitiivit = []
     osoitteet = []
     ryhma = sukupuoli[0] + ika
-    conn = psycopg.connect(DATABASE_URL)
     gluteenia = []
     laktoosia = []
     lihaa = []
     elainperainen = []
     nominatiivit = []
     c_indeksi = 18
-    with conn:
-        with conn.cursor() as curs:
-            # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
-            curs.execute('SELECT rasvat,kertarasvat,monirasvat,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = %s;', (ryhma,))
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        curs = conn.cursor()
+        # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
+        curs.execute('SELECT rasvat,kertarasvat,monirasvat,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = ?;', (ryhma,))
+        for rivi in curs:
+            for i in range(len(rivi)):
+                b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
+        # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä, tai käytä käyttäjän syötettä.
+        if not proteiini:
+            curs.execute('SELECT proteiini FROM saannit WHERE ryhma = ?;', (ryhma,))
             for rivi in curs:
-                for i in range(len(rivi)):
-                    b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
-            # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä, tai käytä käyttäjän syötettä.
-            if not proteiini:
-                curs.execute('SELECT proteiini FROM saannit WHERE ryhma = %s;', (ryhma,))
-                for rivi in curs:
-                    b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
-            else:
-                b.append(-int(proteiini)*MILLIGRAMMAA_PER_GRAMMA)
-            # Hae milligrammoina annetut suositukset.
-            curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = %s', (ryhma,))
-            for rivi in curs:
-                for i in range(len(rivi)):
-                    b.append(-float(rivi[i]))
+                b.append(-float(str(rivi[0])[:-1])/100*energia/PROTEIININ_ENERGIA)
+        else:
+            b.append(-int(proteiini)*MILLIGRAMMAA_PER_GRAMMA)
+        # Hae milligrammoina annetut suositukset.
+        curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = ?', (ryhma,))
+        for rivi in curs:
+            for i in range(len(rivi)):
+                b.append(-float(rivi[i]))
 
-            # Hae ravintoarvot.
-            curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
-                        dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
-            for rivi in curs:
-                A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
-            # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
-            locale = str(flask_babel.get_locale())
-            curs.execute(sql.SQL('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY nimi_fi;').format(sql.Identifier(f'partitiivi_{locale}'),sql.Identifier(f'nimi_{locale}')))
-            for rivi in curs:
-                osoitteet.append(rivi[0])
-                partitiivit.append(rivi[1])
-                gluteenia.append(rivi[2])
-                laktoosia.append(rivi[3])
-                lihaa.append(rivi[4])
-                elainperainen.append(rivi[5])
-                nominatiivit.append(rivi[6])
-    conn.close()
+        # Hae ravintoarvot.
+        curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
+            dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
+        for rivi in curs:
+            A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
+        # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin eritysiruokavalio sen.
+        locale = str(flask_babel.get_locale())
+        curs.execute('SELECT osoite,partitiivi_fi,gluteenia,laktoosia,eikasvis,eivege,nimi_fi FROM arvot ORDER BY nimi_fi;')
+        for rivi in curs:
+            osoitteet.append(rivi[0])
+            partitiivit.append(rivi[1])
+            gluteenia.append(rivi[2])
+            laktoosia.append(rivi[3])
+            lihaa.append(rivi[4])
+            elainperainen.append(rivi[5])
+            nominatiivit.append(rivi[6])
+        curs.close()
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
     for i in reversed(range(len(c))):
@@ -192,16 +190,13 @@ def before_request():
 @multilingual.route('/aineet')
 def aineet():
     nimetjaosoitteet = []
-    conn = psycopg.connect(DATABASE_URL)
     locale = str(flask_babel.get_locale())
-    try:
-        with conn:
-            with conn.cursor() as curs:
-                curs.execute(sql.SQL('SELECT {0}, osoite FROM arvot ORDER BY {0};').format(sql.Identifier(f'nimi_{locale}')))
-                for rivi in curs:
-                    nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
-    except psycopg.OperationalError:
-        return render_template('multilingual/error.html')
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        curs = conn.cursor()
+        curs.execute('SELECT nimi_fi, osoite FROM arvot ORDER BY nimi_fi;')
+        for rivi in curs:
+            nimetjaosoitteet.append({'nimi': rivi[0], 'osoite': ALKU+rivi[1]})
+        curs.close()
     conn.close()
     return render_template('multilingual/aineet.html', data=nimetjaosoitteet)
 
@@ -219,25 +214,20 @@ def index():
     d = request.args.get('d')
     tulos = None
     if ika and sp and energia:
-        try:
-            tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
-        except psycopg.OperationalError:
-            return render_template('multilingual/error.html')
+        tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
         for ruoka in tulos['lista']:
             ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
             ruoka['hinta'] = flask_babel.format_currency(int(ruoka['hinta']*700 + 0.5)/100, 'EUR')
         tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
-    try:
-        with psycopg.connect(DATABASE_URL) as conn:
-            with conn.cursor() as curs:
-                curs.execute('SELECT ryhma FROM saannit;')
-                alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
-                ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
-                ikaryhmat.append('>{}'.format(str(alarajat[-1])))
-    except psycopg.OperationalError:
-        return render_template('multilingual/error.html')
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        curs = conn.cursor()
+        curs.execute('SELECT ryhma FROM saannit;')
+        alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
+        ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
+        ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+        curs.close()
     return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
                            ika=ika,

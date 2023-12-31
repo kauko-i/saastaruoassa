@@ -82,6 +82,10 @@ Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi tulokseks
 Parametrit ovat samat kuin lomakkeella.
 '''
 def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=False, vege=False, proteiini=None, d=None):
+
+    if not re.fullmatch('\d+', energia):
+        abort(400)
+
     # Lomake käyttää kilokaloreita, tietokannat jouleja.
     energia = int(energia)*JOULEA_KALORISSA
 
@@ -106,9 +110,14 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         curs = conn.cursor()
         # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
         curs.execute('SELECT rasvat,kertarasvat,monirasvat,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = ?;', (ryhma,))
+        ryhma_oikein = False
         for rivi in curs:
+            ryhma_oikein = True
             for i in range(len(rivi)):
                 b.append(-float(str(rivi[i])[:-1])/100*energia/RASVAN_ENERGIA)
+        if not ryhma_oikein:
+            curs.close()
+            abort(400)
         # Hae proteiinien prosentteina annettu suositus ja laske milligrammamäärä, tai käytä käyttäjän syötettä.
         if not proteiini:
             curs.execute('SELECT proteiini FROM saannit WHERE ryhma = ?;', (ryhma,))

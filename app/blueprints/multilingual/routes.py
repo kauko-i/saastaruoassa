@@ -74,7 +74,7 @@ def hinnat(osoitteet):
              tasks.append(asyncio.create_task(hinta(osoite)))
         for task in tasks:
             await task
-        return list(map(lambda x: hintadict[x], osoitteet))
+        return [hintadict[osoite] for osoite in osoitteet]
     return asyncio.run(hinnatNoCache(osoitteet))
 
 '''

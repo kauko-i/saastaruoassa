@@ -152,7 +152,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
     for i in reversed(range(len(c))):
-        if c[i] is None or (gluteenia[i] == 0 and keliakia) or (laktoosia[i] == 0 and laktoosi) or (lihaa[i] == 0 and kasvis) or (elainperainen[i] == 0 and vege):
+        if (c[i] is None
+            or (gluteenia[i] == 0 and keliakia)
+            or (laktoosia[i] == 0 and laktoosi)
+            or (lihaa[i] == 0 and kasvis)
+            or (elainperainen[i] == 0 and vege)):
             del c[i]
             del A[i]
             del partitiivit[i]

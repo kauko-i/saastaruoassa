@@ -104,7 +104,6 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     laktoosia = []
     lihaa = []
     elainperainen = []
-    nominatiivit = []
     c_indeksi = 18
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()

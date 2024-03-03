@@ -18,10 +18,10 @@ DATABASE_NAME = os.environ['DATABASE_NAME']
 ENERGIA_YLARAJA = 1.001
 MILLIGRAMMAA_PER_GRAMMA = 1000
 MIKROGRAMMAA_PER_MILLIGRAMMA = 1000
-I_INDEKSI = 27
-B12_INDEKSI = 17
-DHA_INDEKSI = 9
-D_INDEKSI = 19
+I_INDEKSI = 25
+B12_INDEKSI = 15
+DHA_INDEKSI = 7
+D_INDEKSI = 17
 SUKUPUOLET = ['Mies, Nainen']
 
 # Transpoosifunktio: tietokannassa ruoka-aineet vastaavat rivejä, mutta laskennassa niiden on vastattava sarakkeita.
@@ -93,8 +93,9 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     ika = ''.join(filter(str.isdigit, ika.split('-')[0]))
 
     # Muodosta b-vektori ja A-matriisi. Vaikutti, että energiansaantivaatimuksen ei pidä olla aivan tarkka, jottei laskenta sekoaisi.
-    b = [ENERGIA_YLARAJA*energia,-energia]
+    b = []
     A = []
+    A_eq = []
     # Seuraavissa 6 taulukossa indeksit vastaavat matriisin A rivejä (myöhemmin sarakkeita).
     nominatiivit = []
     partitiivit = []
@@ -104,7 +105,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     laktoosia = []
     lihaa = []
     elainperainen = []
-    c_indeksi = 18
+    c_indeksi = 16
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()
         # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
@@ -134,12 +135,13 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
             dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
         for rivi in curs:
-            A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
+            A.append([-float(x) for x in rivi[1:]])
+            A_eq.append(float(rivi[0]))
         # g.lang_codea ei voi käyttää SQL-injektiohyökkäykseen, katso "before_request"-funktio
         partitiivi = 'partitiivi_{}'.format(g.lang_code)
         nimi = 'nimi_{}'.format(g.lang_code)
         # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin erityisruokavalio sen.
-        curs.execute('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY {};'.format(partitiivi,nimi,nimi,))
+        curs.execute('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY nimi_fi;'.format(partitiivi,nimi,))
         for rivi in curs:
             osoitteet.append(rivi[0])
             partitiivit.append(rivi[1])
@@ -159,6 +161,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             or (elainperainen[i] == 0 and vege)):
             del c[i]
             del A[i]
+            del A_eq[i]
             del partitiivit[i]
             del osoitteet[i]
             del nominatiivit[i]
@@ -181,7 +184,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         del A[DHA_INDEKSI]
         c_indeksi -= 2
     # Varsinainen laskenta
-    res = linprog(c, A_ub=A, b_ub=b, method="revised simplex")
+    res = linprog(c, A_ub=A, b_ub=b, A_eq=[A_eq], b_eq=[energia], method="revised simplex")
     hintavektori = res.x * c
     c_maarat = res.x * A[c_indeksi]
     palaute = [{'nimi': partitiivit[i], 'maara': res.x[i], 'hinta': hintavektori[i], 'osoite': ALKU+osoitteet[i]} for i in range(len(res.x))]

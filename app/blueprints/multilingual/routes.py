@@ -135,11 +135,11 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
         for rivi in curs:
             A.append([float(rivi[0])]+list(map(lambda x: -float(x), rivi)))
+        # g.lang_codea ei voi käyttää SQL-injektiohyökkäykseen, katso "before_request"-funktio
+        partitiivi = 'partitiivi_{}'.format(g.lang_code)
+        nimi = 'nimi_{}'.format(g.lang_code)
         # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin erityisruokavalio sen.
-        if str(flask_babel.get_locale()) == 'fi':
-            curs.execute('SELECT osoite,partitiivi_fi,gluteenia,laktoosia,eikasvis,eivege,nimi_fi FROM arvot ORDER BY nimi_fi;')
-        else:
-            curs.execute('SELECT osoite,partitiivi_en,gluteenia,laktoosia,eikasvis,eivege,nimi_en FROM arvot ORDER BY nimi_fi;')
+        curs.execute('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY {};'.format(partitiivi,nimi,nimi,))
         for rivi in curs:
             osoitteet.append(rivi[0])
             partitiivit.append(rivi[1])

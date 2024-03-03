@@ -7,30 +7,36 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-07 19:09+0300\n"
+"POT-Creation-Date: 2024-03-03 18:58+0200\n"
 "PO-Revision-Date: 2023-05-07 19:09+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fi\n"
 "Language-Team: fi <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.13.0\n"
 
 #: app/blueprints/multilingual/templates/multilingual/aineet.html:4
+msgid "Back to the main page"
+msgstr "Palaa etusivulle"
+
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:5
 msgid "The calculation is based on the following foods:"
 msgstr "Laskenta perustuu seuraaviin ruoka-aineisiin:"
 
-#: app/blueprints/multilingual/templates/multilingual/aineet.html:7
+#: app/blueprints/multilingual/templates/multilingual/aineet.html:8
 msgid "product"
 msgstr "tuote"
 
 #: app/blueprints/multilingual/templates/multilingual/error.html:4
 msgid ""
-"The database is unreachable. The creator of this site will feel ashamed if"
-" they can't fix this within a couple of days."
-msgstr "Tietokantaan ei saada yhteyttä. Tämän sivuston luoja tuntee häpeää, ellei saa tätä parissa päivässä korjattua."
+"The database is unreachable. The creator of this site will feel ashamed "
+"if they can't fix this within a couple of days."
+msgstr ""
+"Tietokantaan ei saada yhteyttä. Tämän sivuston luoja tuntee häpeää, ellei"
+" saa tätä parissa päivässä korjattua."
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:4
 msgid "Calculate your cheapest way to fulfill the nutritional recommendations!"
@@ -56,7 +62,9 @@ msgstr "niiden keskimääräisiin hintoihin Prismoissa"
 msgid ""
 "the official Finnish recommendations about the intake of vitamins, "
 "minerals, fibre, protein and fats"
-msgstr "valtion ravitsemusneuvottelukunnan suosituksiin vitamiinien, kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista"
+msgstr ""
+"valtion ravitsemusneuvottelukunnan suosituksiin vitamiinien, "
+"kivennäisaineiden, kuitujen, proteiinien ja rasvojen saannista"
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:9
 msgid "and"
@@ -90,79 +98,87 @@ msgstr "Nainen"
 msgid "Energy consumption (kcal/day):"
 msgstr "Energiantarve (kcal/päivä):"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:29
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:30
 msgid "Celiac"
 msgstr "Keliakia"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:30
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:31
 msgid "Lactose intolerant"
 msgstr "Laktoosi-intoleranssi"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:31
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:32
 msgid "Vegetarian"
 msgstr "Kasvissyöjä"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:32
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:33
 msgid ""
 "Vegan (if you check, the calculator will ignore iodine, vitamin B12, and "
 "docosahexaenoic acid)"
-msgstr "Vegaani (jos ruksaat, laskuri sivuuttaa jodin, B12-vitamiinin ja DHA-rasvahapon)"
+msgstr ""
+"Vegaani (jos ruksaat, laskuri sivuuttaa jodin, B12-vitamiinin ja DHA-"
+"rasvahapon)"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:35
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
 msgid ""
 "My needed protein intake is (g/day, the official recommendation will be "
 "used if you leave this empty):"
-msgstr "Proteiinin tarpeeni on (g/päivä, käytetään virallista suositusta, jos jätät tyhjäksi):"
+msgstr ""
+"Proteiinin tarpeeni on (g/päivä, käytetään virallista suositusta, jos "
+"jätät tyhjäksi):"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:39
 msgid "I know I get"
 msgstr "Tiedän saavani"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:37
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:39
 msgid "µg of vitamin D from the sun per day."
 msgstr "µg D-vitamiinia auringosta päivässä."
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:39
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:42
+msgid "Filter groceries manually: "
+msgstr "Suodata ruokia manuaalisesti: "
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:47
 msgid "Calculate!"
 msgstr "Laske!"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:42
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:50
 msgid "The results (weekly portion)"
 msgstr "Tulokset (viikottainen määrä)"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:56
 msgid "Together"
 msgstr "Yhteensä"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:56
 msgid "per week!"
 msgstr "/ viikko!"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
 msgid "WARNING:"
 msgstr "VAROITUS:"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
 msgid ""
 "Certain processes destroy certain nutrients. For example, vitamin C gets "
 "easily destroyed when heated up, and its most essential source is"
-msgstr "Valmistustapa vaikuttaa ravintoarvoihin. Esimerkiksi C-vitamiini hajoaa helposti kuumennettaessa, ja sen tärkein lähde on"
+msgstr ""
+"Valmistustapa vaikuttaa ravintoarvoihin. Esimerkiksi C-vitamiini hajoaa "
+"helposti kuumennettaessa, ja sen tärkein lähde on"
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:49
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
 msgid ""
 "in these results. Furthermore, nothing proves the nutritional research to"
 " be ready. You follow the results at your own risk."
-msgstr "tässä tuloksessa. Mikään ei myöskään todista, että ravitsemustutkimus olisi valmis. Laskurituloksen noudattaminen omalla vastuulla."
-
-#: app/templates/aineet.html:4
-msgid "Back to the main page"
-msgstr "Palaa etusivulle"
+msgstr ""
+"tässä tuloksessa. Mikään ei myöskään todista, että ravitsemustutkimus "
+"olisi valmis. Laskurituloksen noudattaminen omalla vastuulla."
 
 #: app/templates/base.html:6
 msgid "Save in Food"
 msgstr "Säästä ruoassa"
 
-#: app/templates/base.html:23
+#: app/templates/base.html:21
 msgid "Questions and feedback"
 msgstr "Kysymykset ja palaute"
 

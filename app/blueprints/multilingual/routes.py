@@ -219,9 +219,13 @@ def aineet():
     conn.close()
     return render_template('multilingual/aineet.html', data=nimetjaosoitteet)
 
+@multilingual.route('/tarkka')
+def tarkka():
+    return index(True)
+
 # Etusivun näyttävä "pääohjelma"
 @multilingual.route('/')
-def index():
+def index(tarkka=False):
     ika = request.args.get('ika')
     sp = request.args.get('sp')
     energia = request.args.get('energia')
@@ -240,12 +244,16 @@ def index():
         tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
         tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
+    aineet = None
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()
         curs.execute('SELECT ryhma FROM saannit;')
         alarajat = sorted(set([x[0][1:] for x in curs.fetchall()]), key=int)
         ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
         ikaryhmat.append('>{}'.format(str(alarajat[-1])))
+        if tarkka:
+            curs.execute('SELECT nimi_{} from arvot ORDER BY nimi_fi;'.format(g.lang_code))
+            aineet = [x[0] for x in curs.fetchall()]
         curs.close()
     return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
@@ -258,6 +266,7 @@ def index():
                            vegaani=vegaani,
                            proteiini=proteiini,
                            d=d,
+                           aineet=aineet,
                            tulos=tulos['lista'] if tulos else None,
                            yhteensa=tulos['yhteensa'] if tulos else None,
                            clahde=tulos['clahde'] if tulos else None)

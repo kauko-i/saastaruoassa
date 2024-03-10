@@ -81,7 +81,7 @@ def hinnat(osoitteet):
 Muuntaa käyttäjän antaman syötteen käyttäjälle näytettäväksi tulokseksi.
 Parametrit ovat samat kuin lomakkeella.
 '''
-def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=False, vege=False, proteiini=None, d=None):
+def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=False, vege=False, proteiini=None, d=None, sallitut=None):
 
     if not re.fullmatch('\d+', energia):
         abort(400)
@@ -105,6 +105,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     laktoosia = []
     lihaa = []
     elainperainen = []
+    suominominatiivit = []
     c_indeksi = 16
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()
@@ -141,7 +142,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         partitiivi = 'partitiivi_{}'.format(g.lang_code)
         nimi = 'nimi_{}'.format(g.lang_code)
         # Hae ruokien tuoteosoitteet, nominatiivi- ja partitiivimuodon nimet ja se, poissulkeeko kukin erityisruokavalio sen.
-        curs.execute('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{} FROM arvot ORDER BY nimi_fi;'.format(partitiivi,nimi,))
+        curs.execute('SELECT osoite,{},gluteenia,laktoosia,eikasvis,eivege,{},nimi_fi FROM arvot ORDER BY nimi_fi;'.format(partitiivi,nimi,))
         for rivi in curs:
             osoitteet.append(rivi[0])
             partitiivit.append(rivi[1])
@@ -150,6 +151,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             lihaa.append(rivi[4])
             elainperainen.append(rivi[5])
             nominatiivit.append(rivi[6])
+            suominominatiivit.append(rivi[7])
         curs.close()
     c = hinnat(osoitteet)
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
@@ -158,7 +160,8 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
             or (gluteenia[i] == 0 and keliakia)
             or (laktoosia[i] == 0 and laktoosi)
             or (lihaa[i] == 0 and kasvis)
-            or (elainperainen[i] == 0 and vege)):
+            or (elainperainen[i] == 0 and vege)
+            or (sallitut is not None and suominominatiivit[i] not in sallitut)):
             del c[i]
             del A[i]
             del A_eq[i]
@@ -226,23 +229,6 @@ def tarkka():
 # Etusivun näyttävä "pääohjelma"
 @multilingual.route('/')
 def index(tarkka=False):
-    ika = request.args.get('ika')
-    sp = request.args.get('sp')
-    energia = request.args.get('energia')
-    keliakia = request.args.get('keliakia')
-    laktoosi = request.args.get('laktoosi')
-    kasvis = request.args.get('kasvis')
-    vegaani = request.args.get('vegaani')
-    proteiini = request.args.get('proteiini')
-    d = request.args.get('d')
-    tulos = None
-    if ika and sp and energia:
-        tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d)
-        for ruoka in tulos['lista']:
-            ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
-            ruoka['hinta'] = flask_babel.format_currency(int(ruoka['hinta']*700 + 0.5)/100, 'EUR')
-        tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
-        tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     ikaryhmat = []
     aineet = None
     with sqlite3.connect(DATABASE_NAME) as conn:
@@ -252,9 +238,33 @@ def index(tarkka=False):
         ikaryhmat = ['{}-{}'.format(alarajat[i], str(int(alarajat[i + 1]) - 1)) for i in range(len(alarajat) - 1)]
         ikaryhmat.append('>{}'.format(str(alarajat[-1])))
         if tarkka:
-            curs.execute('SELECT nimi_{} from arvot ORDER BY nimi_fi;'.format(g.lang_code))
-            aineet = [x[0] for x in curs.fetchall()]
+            curs.execute('SELECT nimi_fi,nimi_{} from arvot ORDER BY nimi_fi;'.format(g.lang_code))
+            aineet = [{'value': x[0], 'name': x[1]} for x in curs.fetchall()]
         curs.close()
+    ika = request.args.get('ika')
+    sp = request.args.get('sp')
+    energia = request.args.get('energia')
+    sallitut = None
+    if tarkka:
+        sallitut = []
+        for key in dict(request.args):
+            luonnollinen_muoto = key.replace('+', ' ')
+            if luonnollinen_muoto in [aine['value'] for aine in aineet] and request.args.get(key):
+                sallitut.append(luonnollinen_muoto)
+    keliakia = request.args.get('keliakia')
+    laktoosi = request.args.get('laktoosi')
+    kasvis = request.args.get('kasvis')
+    vegaani = request.args.get('vegaani')
+    proteiini = request.args.get('proteiini')
+    d = request.args.get('d')
+    tulos = None
+    if ika and sp and energia:
+        tulos = syote2tulos(ika, sp, energia, keliakia, laktoosi, kasvis, vegaani, proteiini, d, sallitut)
+        for ruoka in tulos['lista']:
+            ruoka['maara'] = int(ruoka['maara']*700 + 0.5)
+            ruoka['hinta'] = flask_babel.format_currency(int(ruoka['hinta']*700 + 0.5)/100, 'EUR')
+        tulos['yhteensa'] = flask_babel.format_currency(int(tulos['yhteensa']*700 + 0.5)/100, 'EUR')
+        tulos['lista'] = list(filter(lambda ruoka: 0 != ruoka['maara'], tulos['lista']))
     return render_template('multilingual/etusivu.html',
                            ryhmat=ikaryhmat,
                            ika=ika,
@@ -267,6 +277,7 @@ def index(tarkka=False):
                            proteiini=proteiini,
                            d=d,
                            aineet=aineet,
+                           sallitut=sallitut,
                            tulos=tulos['lista'] if tulos else None,
                            yhteensa=tulos['yhteensa'] if tulos else None,
                            clahde=tulos['clahde'] if tulos else None)

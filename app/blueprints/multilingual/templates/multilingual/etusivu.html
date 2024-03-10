@@ -25,25 +25,24 @@
           <input name="energia" type="number" required value="{{energia}}">
         </label>
       </fieldset>
-      {% if not aineet %}
       <fieldset>
+        {% if not aineet %}
         <label><input name="keliakia" {{ 'checked' if keliakia }} type="checkbox">{{_('Celiac')}}</label>
         <label><input name="laktoosi" {{ 'checked' if laktoosi }} type="checkbox">{{_('Lactose intolerant')}}</label>
         <label><input name="kasvis" {{ 'checked' if kasvis }} type="checkbox">{{_('Vegetarian')}}</label>
         <label><input name="vegaani" {{ 'checked' if vegaani }} type="checkbox">{{_('Vegan (if you check, the calculator will ignore iodine, vitamin B12, and docosahexaenoic acid)')}}</label>
+        <div><a href="tarkka">{{_('Filter the groceries manually')}}</a></div>
+        {% else %}
+        <label>{{_('The groceries allowed in the calculation are: ')}}</label>
+        {% for aine in aineet %}<label><input type="checkbox" name="{{aine}}" checked>{{ aine }}</label> {% endfor %}
+        <div><a href=".">{{_('Don\'t filter the groceries manually')}}</a></div>
+        {% endif %}
       </fieldset>
-      {% endif %}
       <fieldset>
         <label>{{_('My needed protein intake is (g/day, the official recommendation will be used if you leave this empty):')}} <input name="proteiini" type="number" value="{{proteiini}}"></label>
         <br>
         <label>{{_('I know I get')}} <input name="d" type="number" value="{{d}}"> {{_('µg of vitamin D from the sun per day.')}}</label>
       </fieldset>
-      {% if aineet %}
-      <p>{{_('Filter groceries manually: ')}}</p>
-      <fieldset>
-        {% for aine in aineet %}<label><input type="checkbox">{{ aine }}</label> {% endfor %}
-      </fieldset>
-      {% endif %}
       <input type="submit" value="{{_('Calculate!')}}">
     </form>
     {% if tulos %}

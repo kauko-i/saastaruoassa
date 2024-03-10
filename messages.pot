@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-03 18:58+0200\n"
+"POT-Creation-Date: 2024-03-10 17:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,47 +125,55 @@ msgstr ""
 msgid "µg of vitamin D from the sun per day."
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:42
-msgid "Filter groceries manually: "
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:43
+msgid "The groceries allowed in the calculation are: "
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:47
-msgid "Calculate!"
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:45
+msgid "Don't filter the groceries manually"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:48
+msgid "Filter the groceries manually"
 msgstr ""
 
 #: app/blueprints/multilingual/templates/multilingual/etusivu.html:50
+msgid "Calculate!"
+msgstr ""
+
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:53
 msgid "The results (weekly portion)"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:56
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:59
 msgid "Together"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:56
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:59
 msgid "per week!"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:60
 msgid "WARNING:"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:60
 msgid ""
 "Certain processes destroy certain nutrients. For example, vitamin C gets "
 "easily destroyed when heated up, and its most essential source is"
 msgstr ""
 
-#: app/blueprints/multilingual/templates/multilingual/etusivu.html:57
+#: app/blueprints/multilingual/templates/multilingual/etusivu.html:60
 msgid ""
 "in these results. Furthermore, nothing proves the nutritional research to"
 " be ready. You follow the results at your own risk."
 msgstr ""
 
-#: app/templates/base.html:6
+#: app/templates/base.html:7
 msgid "Save in Food"
 msgstr ""
 
-#: app/templates/base.html:21
+#: app/templates/base.html:22
 msgid "Questions and feedback"
 msgstr ""
 

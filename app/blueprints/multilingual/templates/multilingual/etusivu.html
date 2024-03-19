@@ -35,7 +35,7 @@
         {% else %}
         <label>{{_('The groceries allowed in the calculation are: ')}}</label>
         {% for aine in aineet %}<label>
-          <input type="checkbox" name="{{aine['value']}}" {% if aine['value'] in sallitut %}checked{% endif %}>{{ aine['name'] }}
+          <input type="checkbox" name="{{aine['value']}}" {% if sallitut == [] or aine['value'] in sallitut %}checked{% endif %}>{{ aine['name'] }}
         </label> {% endfor %}
         <div><a href=".">{{_('Don\'t filter the groceries manually')}}</a></div>
         {% endif %}

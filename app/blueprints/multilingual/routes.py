@@ -86,8 +86,8 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     if not re.fullmatch('\d+', energia):
         abort(400)
 
-    # Lomake käyttää kilokaloreita, tietokannat jouleja.
-    energia = int(energia)*JOULEA_KALORISSA
+    # Lomake käyttää kilokaloreita, tietokannat jouleja. Scipy näyttää sekoilevan joidenkin desimaalilukujen kanssa, siksi pyöristys
+    energia = round(int(energia)*JOULEA_KALORISSA)
 
     # Tietokanta yksilöi ikäryhmät alarajan perusteella.
     ika = ''.join(filter(str.isdigit, ika.split('-')[0]))

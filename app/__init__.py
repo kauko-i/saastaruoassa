@@ -31,6 +31,8 @@ babel.init_app(app, locale_selector=get_locale)
 @app.route('/')
 def home():
     g.lang_code = request.accept_languages.best_match(app.config['LANGUAGES'])
+    if not g.lang_code:
+        g.lang_code = 'en'
     return redirect(url_for('multilingual.index'))
 
 if __name__ == '__main__':

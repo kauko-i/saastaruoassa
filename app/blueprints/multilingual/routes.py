@@ -110,7 +110,7 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     with sqlite3.connect(DATABASE_NAME) as conn:
         curs = conn.cursor()
         # Hae rasvojen prosentteina annetut suositukset ja laske milligrammamäärät.
-        curs.execute('SELECT rasvat,kertarasvat,monirasvat,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = ?;', (ryhma,))
+        curs.execute('SELECT rasva,kertarasva,monirasva,n3,alfalinoleeni,linoli FROM saannit WHERE ryhma = ?;', (ryhma,))
         ryhma_oikein = False
         for rivi in curs:
             ryhma_oikein = True
@@ -127,14 +127,14 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
         else:
             b.append(-int(proteiini)*MILLIGRAMMAA_PER_GRAMMA)
         # Hae milligrammoina annetut suositukset.
-        curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM saannit WHERE ryhma = ?', (ryhma,))
+        curs.execute('SELECT dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,k,ca,p,kalium,mg,fe,zn,i,se FROM saannit WHERE ryhma = ?', (ryhma,))
         for rivi in curs:
             for i in range(len(rivi)):
                 b.append(-float(rivi[i]))
 
         # Hae ravintoarvot.
-        curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfa,linoli,proteiini,
-            dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,ca,p,k,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
+        curs.execute('''SELECT energia,rasva,kertarasva,monirasva,n3,alfalinoleeni,linoli,proteiini,
+            dha,kuitu,a,b1,b2,b3,b6,b9,b12,c,d,e,k,ca,p,kalium,mg,fe,zn,i,se FROM arvot ORDER BY nimi_fi;''')
         for rivi in curs:
             A.append([-float(x) for x in rivi[1:]])
             A_eq.append(float(rivi[0]))
@@ -157,10 +157,10 @@ def syote2tulos(ika, sukupuoli, energia, keliakia=False, laktoosi=False, kasvis=
     # Poista ne tuotteet laskuista, jotka erityisruokavalio poissulkee tai joille ei löytynyt hintaa.
     for i in reversed(range(len(c))):
         if (c[i] is None
-            or (gluteenia[i] == 0 and keliakia)
-            or (laktoosia[i] == 0 and laktoosi)
-            or (lihaa[i] == 0 and kasvis)
-            or (elainperainen[i] == 0 and vege)
+            or (gluteenia[i] == 1 and keliakia)
+            or (laktoosia[i] == 1 and laktoosi)
+            or (lihaa[i] == 1 and kasvis)
+            or (elainperainen[i] == 1 and vege)
             or (sallitut is not None and suominominatiivit[i] not in sallitut)):
             del c[i]
             del A[i]
